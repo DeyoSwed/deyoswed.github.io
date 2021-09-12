@@ -1,5 +1,0 @@
-~ $ cd deyoswed.perfectart
-~ $ echo "Hello World" > index.html
-~ $ git add --all
-~ $ git commit -m "initaial comment"
-~ $ git push -u origin main
