@@ -1,1 +1,7 @@
 theme: THEME-NAME
+defaults:
+-
+scope:
+path: ""
+values:
+layout: "default"
