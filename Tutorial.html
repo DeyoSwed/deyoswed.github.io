@@ -4,6 +4,7 @@
 <title>CSS Template</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--<link rel="stylesheet" href="styles1.css">-->
 <style>
 * {
   box-sizing: border-box;
@@ -11,33 +12,16 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  <!--width: 70%;-->
-  <!--margin-left: auto;
-  margin-right: auto;-->
   line-height: 150%;
 }
 
-/* Style the header */
 header {
   text-align: center;
   font-size: 50px;
   color: black;
-  <!--min-height: 100%;-->
+  
 }
 
-dude2 {
-	width: 100%;
-	height: 2px;
-	color:#429bb8;
-	background-color:#429bb8;
-	margin-top: 0.0em;
-	margin-bottom: 0.0em;
-	border-style: inset;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-/* Style nav*/
 Nav {
 	text-align: center;
 	font-size: 15px;
@@ -61,7 +45,7 @@ section:after {
   content: "";
   display: table;
   clear: both;
-  display: block;
+  <!--display: block;-->
  
 }
 
@@ -73,10 +57,10 @@ aside {
   padding-top: 20px;
   min-height: 800px;
  
-}
+}-->
 
 /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media (max-width: 600px) {
+@media all and (max-width: 600px) {
   aside, article {
     min-width: 100%;
     min-height: 100%;
@@ -84,7 +68,7 @@ aside {
 }
 
 /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media (min-width: 600px) {
+@media all and (min-width: 600px) {
   body {
     max-width: 70%;
     height: 100%;
@@ -95,7 +79,7 @@ aside {
 
 footer {
 
-	 style="position:fixed; 
+	 <!--position:fixed;--> 
 	 bottom: 0; 
 	 width:100%; 
 	 text-align: center;
@@ -104,12 +88,6 @@ footer {
 	
 	}
 	
-	
-
-dude{
-font-size: 25px;
-}
-
 table{
 	padding: 15px;
 }
@@ -120,91 +98,93 @@ table{
 
 </head>
 <body>
-<header>
-  <h2>Kristofer DeYoung</h2>
-    <blockquote><dude><i>“Be humble. Be hungry. And always be the hardest worker in the room.”</i> – Dwayne Johnson</dude></blockquote>
-	
-</header>
+  <header>
+    <h2>Kristofer DeYoung</h2>
+    <blockquote style="font-size:25px"><i>“Be humble. Be hungry. And always be the hardest worker in the room.”</i> – Dwayne Johnson</blockquote>
 
- <nav>
- <hr>
- <p>
+  </header>
+
+  <nav>
+    <hr>
+    <p>
       <a href="index.html">Main</a>
       <a href="tabel.html">Experiment1</a>
       <a href="Notes.html">Experiment2</a>
     </p>
-<hr>
-	
-	
- </nav>
+    <hr>
 
-<section>
-  <article>
-	
-	<h1>Motivated and Driven relationship builder</h1>
-    <p>Mixing sales with analytics to filter out the “noise” and give a clear concise focus that can be easily
-understood and scaled to achieve the best sustainable business model.</p>
-  
- <hr> 
-    <h1>Private Label Specialist</h1>
-    <table>
-			<ul> <b> Achievements/Tasks</b>
-			<li> We achieved ambitious milestones for our Private Labels through; trade shows, frame agreements
-				and tenders for national clients, Retail Concept, National assortment, pricing and Analyzing
-				industry trends for future KPI’s in new and existing product range development.
-			<li> Spent over 150 days traveling with 90 travel destinations in 2018 and was the most used trade
-				show consultant 2019.
-		</table>
-		<hr>	
-		 <h1>Interim Store Manager</h1>
-    <table>
-			<ul> <b> Achievements/Tasks </b>
+  </nav>
 
-			<li> Managed Ahlsell's largest retail location Brobekk with 15 employees that was suffering from the
-				aftershock of a big merger, where I made major changes to staffing, assortment and cutting
-				overhead expenses drastically increasing revenue and profitability.
-			<li> Duplicated previous success from Brobekk to location Bærum and then contributed with opening
-					a further 3 new locations before entering a new position in the company.
-		</table>
-		<hr>
-		<h1>Owner: Perax AS(Perfect Art)</h1>
-		<table>
-					<ul><b> Achievements/Tasks </b>
-			<li> Negotiated price and procurement terms assisted by foreign and domestic consultants. Created
-				multi channel marketing platform while maintaining quality logistics to end the consumer.
-			<li> I received my first 40 foot container from the Shenzhen province to Oslo with 280 handmade oil
-				paintings.
-		</table>
-		
-  </article>
-  
-  <aside>
-	<img src="kris.jpg" alt="kris"; width="100%"; height="auto"; align="center">
-	
-  
-    <table>
-			<ul> <b>Skills:</b>
-			<li> Emotional Intelligence
-			<li> Business Accumen
-			<li> Data Analysis
-			<li> Sales
-			<li> Management
-	</table>
-  </aside>
-  
-</section>
+  <section>
+    <article>
 
+      <h1>Motivated and Driven relationship builder</h1>
+      <p>Mixing sales with analytics to filter out the “noise” and give a clear concise focus that can be easily
+        understood and scaled to achieve the best sustainable business model.</p>
 
-<footer>
-  <hr>
-  <p>
-  <a href="https://www.linkedin.com/in/kristofer-deyoung/" target="_blank">Linkedin </a>
-  <a href="https://www.facebook.com/kristofer.deyoung/" target="_blank">Facebook </a>
-  <a href="https://www.instagram.com/deyoswed/" target="_blank">Instagram  </a>
-  </p>
-  <hr>
-  
-</footer>
+      <hr>
+      <h1>Private Label Specialist</h1>
+      <table>
+        <ul> <b> Achievements/Tasks</b>
+          <li> We achieved ambitious milestones for our Private Labels through; trade shows, frame agreements
+            and tenders for national clients, Retail Concept, National assortment, pricing and Analyzing
+            industry trends for future KPI’s in new and existing product range development.</li>
+          <li> Spent over 150 days traveling with 90 travel destinations in 2018 and was the most used trade
+            show consultant 2019.</li>
+        </ul>
+      </table>
+      <hr>
+      <h1>Interim Store Manager</h1>
+      <table>
+        <ul> <b> Achievements/Tasks </b>
+
+          <li> Managed Ahlsell's largest retail location Brobekk with 15 employees that was suffering from the
+            aftershock of a big merger, where I made major changes to staffing, assortment and cutting
+            overhead expenses drastically increasing revenue and profitability.</li>
+          <li> Duplicated previous success from Brobekk to location Bærum and then contributed with opening
+            a further 3 new locations before entering a new position in the company.</li>
+        </ul>
+      </table>
+      <hr>
+      <h1>Owner: Perax AS(Perfect Art)</h1>
+      <table>
+        <ul><b> Achievements/Tasks </b>
+          <li> Negotiated price and procurement terms assisted by foreign and domestic consultants. Created
+            multi channel marketing platform while maintaining quality logistics to end the consumer.</li>
+          <li> I received my first 40 foot container from the Shenzhen province to Oslo with 280 handmade oil
+            paintings.</li>
+        </ul>
+      </table>
+
+    </article>
+
+    <aside>
+      <img src="kris.jpg" alt="kris" ; width="100%" ; height="auto" ; align="center" />
+
+      <table>
+        <ul> <b>Skills:</b>
+          <li> Emotional Intelligence</li>
+          <li> Business Accumen</li>
+          <li> Data Analysis</li>
+          <li> Sales</li>
+          <li> Management</li>
+        </ul>
+      </table>
+    </aside>
+
+  </section>
+
+  <footer>
+    <hr>
+    <p>
+      <a href="https://www.linkedin.com/in/kristofer-deyoung/" target="_blank">Linkedin </a>
+      <a href="https://www.facebook.com/kristofer.deyoung/" target="_blank">Facebook </a>
+      <a href="https://www.instagram.com/deyoswed/" target="_blank">Instagram </a>
+    </p>
+    <hr>
+
+  </footer>
 
 </body>
+
 </html>
