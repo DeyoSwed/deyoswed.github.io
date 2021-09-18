@@ -63,6 +63,24 @@ dude{
 font-size: 25px;
 }
 
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media (max-width: 600px) {
+  aside, article {
+    min-width: 100%;
+    min-height: 100%;
+  }
+}
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media (min-width: 600px) {
+  body {
+    max-width: 70%;
+    min-height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+  }
+}
+
 </style>
 
 
