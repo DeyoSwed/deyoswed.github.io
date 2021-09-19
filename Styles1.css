@@ -1,27 +1,35 @@
 <style>
 
-@media (min-width: 600px) {
-  body {
-    max-width: 70%;
-    height: auto%;
-	margin-left: auto;
-	margin-right: auto;
+
+
+
+
+
+
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media all and (max-width: 600px) {
+  aside, article {
+    min-width: 70%;
+    min-height: 100%;
   }
 }
 
 /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media (max-width: 600px) {
-  aside, article {
-    width: 100%;
-    height: auto%;
+@media all and (min-width: 600px) {
+  body {
+    max-width: 100%;
+    height: 100%;
+	margin-left: auto;
+	margin-right: auto;
   }
 }
-
-
-
-
 * {
   box-sizing: border-box;
+}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 150%;
 }
 
 header {
@@ -30,12 +38,6 @@ header {
   color: black;
   
 }
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 150%;
-}
-
 
 Nav {
 	text-align: center;
@@ -55,6 +57,13 @@ article {
   min-height: 800px;
  }
 
+section:after {
+  content: "";
+  display: table;
+  clear: both;
+  display: block;
+ 
+}
 
 aside {
   float: right;
@@ -66,32 +75,20 @@ aside {
  
 }
 
-table{
-	padding: 15px;
-}
-
-section:after {
-  content: "";
-  display: table;
-  clear: both;
-  display: block;
- 
-}
-
-
 footer {
 
 	 style: position:fixed; 
 	 bottom: 0; 
-	 width: 100%; 
+	 width:100%; 
 	 text-align: center;
 	 padding-top: 20px;
 	 word-spacing: 30px;
 	
+	}
+
+table{
+	padding: 15px;
 }
-
-
-
 
 
 </style>
