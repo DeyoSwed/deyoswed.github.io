@@ -23,17 +23,18 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 150%;
-}
-
 header {
   text-align: center;
   font-size: 50px;
   color: black;
   
 }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 150%;
+}
+
 
 Nav {
 	text-align: center;
@@ -53,13 +54,6 @@ article {
   min-height: 800px;
  }
 
-section:after {
-  content: "";
-  display: table;
-  clear: both;
-  display: block;
- 
-}
 
 aside {
   float: right;
@@ -70,6 +64,19 @@ aside {
   min-height: 800px;
  
 }
+
+table{
+	padding: 15px;
+}
+
+section:after {
+  content: "";
+  display: table;
+  clear: both;
+  display: block;
+ 
+}
+
 
 footer {
 
@@ -82,9 +89,7 @@ footer {
 	
 }
 
-table{
-	padding: 15px;
-}
+
 
 
 
