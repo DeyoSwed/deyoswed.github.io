@@ -1,4 +1,24 @@
 <style>
+
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media all and (max-width: 600px) {
+  aside, article {
+    min-width: 100%;
+    min-height: 100%;
+  }
+}
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media all and (min-width: 600px) {
+  body {
+    max-width: 70%;
+    height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,7 +28,6 @@ body {
   line-height: 150%;
 }
 
-/* Style the header */
 header {
   text-align: center;
   font-size: 50px;
@@ -34,7 +53,6 @@ article {
   min-height: 800px;
  }
 
-/* Clear floats after the columns */
 section:after {
   content: "";
   display: table;
@@ -43,9 +61,9 @@ section:after {
  
 }
 
-<aside {
+aside {
   float: right;
-  width: 20%;
+  max-width: 20%;
   background: #ccc;
   padding: 30px;
   padding-top: 20px;
@@ -53,27 +71,9 @@ section:after {
  
 }
 
-/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media(max-width: 600px) {
-  aside, article {
-    min-width: 100%;
-    min-height: 100%;
-  }
-}
-
-/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media (min-width: 600px) {
-  body {
-    max-width: 70%;
-    height: 100%;
-	margin-left: auto;
-	margin-right: auto;
-  }
-}
-
 footer {
 
-	 style="position:fixed; 
+	 style="position:fixed"; 
 	 bottom: 0; 
 	 width:100%; 
 	 text-align: center;
@@ -85,6 +85,7 @@ footer {
 table{
 	padding: 15px;
 }
+
 
 
 </style>
