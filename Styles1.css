@@ -10,7 +10,7 @@
 }
 
 /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
-@media all and (min-width: 600px) {
+@media (min-width: 600px) {
   body {
     max-width: 70%;
     height: 100%;
