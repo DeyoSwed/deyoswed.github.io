@@ -3381,7 +3381,7 @@ input, select, textarea {
 		-ms-align-items: center;
 		align-items: center;
 		/* background-image: url("../../images/boats.jpg");*/
-		background-image: url("../../images/boats.jpg");
+		background-image: url("../../images/boats-tiny.jpg");
 		display: -moz-flex;
 		display: -webkit-flex;
 		display: -ms-flex;
