@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work — Kristofer DeYoung</title>
+<meta name="description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<link rel="canonical" href="https://www.kristoferdeyoung.com/work.html">
+<meta name="author" content="Kristofer DeYoung">
+<meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kristofer DeYoung">
+<meta property="og:title" content="Work — Kristofer DeYoung">
+<meta property="og:description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<meta property="og:url" content="https://www.kristoferdeyoung.com/work.html">
+<meta property="og:image" content="https://www.kristoferdeyoung.com/assets/img/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Kristofer DeYoung — data scientist and AI engineer">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Work — Kristofer DeYoung">
+<meta name="twitter:description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<meta name="twitter:image" content="https://www.kristoferdeyoung.com/assets/img/og-cover.jpg">
+
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<script>
+/* Apply a stored theme choice before first paint to avoid a flash. */
+(function(){try{var t=localStorage.getItem("kdy-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><b>Kristofer DeYoung</b> <span>&middot; data &amp; AI</span></a>
+    <nav class="nav" aria-label="Primary"><a href="index.html">Home</a><a href="work.html" aria-current="page">Work</a><a href="about.html">About</a><a href="beyond.html">Beyond work</a></nav>
+    <button class="icon-btn theme-toggle" type="button" aria-label="Switch colour theme"><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5 5.8 5.8 0 1 0 13.5 9.6Z" stroke-linejoin="round"/></svg><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1m11-5-1.1 1.1M5.1 10.9 4 12m8 0-1.1-1.1M5.1 5.1 4 4" stroke-linecap="round"/></svg></button>
+  </div>
+</header>
+<main id="main">
+
+<section class="tight">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:1.5rem">
+      <p class="eyebrow">Work</p>
+      <h1 class="h-xl" style="max-width:16ch">What I have actually built</h1>
+      <p class="lede" style="max-width:56ch">Six pieces of work, then the open projects and the live
+        dashboards. The employer cases are described without naming internal systems or customers —
+        the approach and the trade-offs are the interesting part anyway.</p>
+    </div>
+    <div class="note" style="max-width:60ch">
+      <strong>On confidentiality.</strong> Employer work is written up generically: no internal
+      system names, no customer names, and results given at order of magnitude rather than as exact
+      internal figures. Happy to go a level deeper in conversation, within what is mine to share.
+    </div>
+  </div>
+</section>
+<section class="tight"><div class="wrap">
+    <article class="case reveal" id="documents">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">Applied AI &middot; in production</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2025 &ndash; present</dd><dt>Role</dt><dd>Owner &mdash; modelling, backend, cloud, DevOps, front end</dd><dt>Stack</dt><dd>Azure OpenAI, Python, Terraform, Kubernetes, Azure DevOps, REST APIs, EDI &amp; ERP</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">A pilot that had defeated four years of attempts</h3>
+        <div class="prose"><h4>The problem</h4><p>A large share of customer orders never arrives as clean EDI. They arrive as PDFs — exported from a customer's own ERP, scanned, screenshotted, forwarded, or assembled by hand in Excel and printed. Every one of them has to become structured order lines in the ERP, and until recently a person did that by reading the document and typing.</p><p>The idea was not new. The project had been open for roughly four years, and something like half a dozen data scientists had taken a run at it before me. The technology was not the blocker — by the end there were capable models available to anyone. The blocker was that nobody had defined the problem tightly enough for a solution to be finishable.</p><h4>What I changed</h4><p>I started by narrowing it. Not &lsquo;parse any document&rsquo; but: which fields, at what confidence, for which document families, failing how, and into which existing order path. Once that was written down, most of the work became ordinary engineering.</p><ul><li>Extraction against a strict output schema rather than free text, so a bad response is detectable instead of plausible</li><li>Defaulting and enrichment for the fields customers routinely omit — ship-to, order class, whether the order must ship complete</li><li>Throttling, back-off and retry handling; the difference between a demo and something that runs unattended at volume</li><li>Infrastructure as code with Terraform, deployment on Kubernetes, pipelines in Azure DevOps</li><li>New API endpoints and the front end for the human-review path, because the parts a person touches decide whether the automated parts get trusted</li><li>An evaluation set of real documents, scored per field, so improvement is a measurement rather than an opinion</li></ul><h4>Where it landed</h4><p>It runs. Over recent months the volume of AI-parsed billed orders has grown close to exponentially, and the ceiling now is adoption and document supply rather than the system.</p><p>The honest lesson is not a flattering one about me. Several capable people had worked on this. What I brought was not better modelling — it was being willing to spend the first weeks arguing about scope instead of building.</p></div>
+        <p class="callout" style="margin-top:1.8rem">The interesting engineering in an LLM feature is almost never the prompt. It is the schema, the retries, the review path and the evaluation set.</p>
+      </div>
+    </article>
+    <article class="case reveal" id="flows">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">Commercial ML &middot; measured</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2024 &ndash; present</dd><dt>Role</dt><dd>Designed and built the framework</dd><dt>Stack</dt><dd>Python, Azure, dbt, Databricks, holdout design</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">Eight figures a year, measured against a holdout</h3>
+        <div class="prose"><h4>The problem</h4><p>A distributor generates an enormous number of small commercial signals every day: a basket left behind, an order that stops repeating, a customer who has quietly moved a category to someone else. Each one is individually trivial and collectively enormous, and almost none of them were being acted on in any systematic way.</p><p>The trap is to build a one-off campaign for each. That produces something that works once, cannot be evaluated, and nobody maintains.</p><h4>What I built</h4><p>A reusable framework for triggered commercial flows — the shared machinery for detecting a signal, deciding whether it warrants contact, executing, and measuring. Individual flows become configuration rather than new projects.</p><ul><li>Signal definitions modelled in dbt so the meaning of a trigger is in version control, not in someone's head</li><li>Eligibility and suppression rules, so the business never has to choose between acting and annoying its customers</li><li><b>A holdout group built in from the first flow</b> — a randomly withheld population that receives nothing, so incremental effect is measurable rather than inferred from a before/after chart</li><li>Reporting that reads the holdout comparison continuously rather than at launch</li></ul><h4>Where it landed</h4><p>The first flow built on it was abandoned cart. Compared against its holdout group, it produces incremental conversion in the <b>eight figures SEK annually</b>. Several further flows have since been built on the same framework, which was the actual objective — the first flow was the proof, not the product.</p><p>The holdout is the part I would defend hardest. Attribution in commercial analytics is mostly wishful, and the standard alternative — comparing to last year — would have credited this with a far larger and completely unreliable number.</p></div>
+        <p class="callout" style="margin-top:1.8rem">Any flow can look like it worked. A holdout group is the cheapest honest answer to &ldquo;compared to what?&rdquo;</p>
+      </div>
+    </article>
+    <article class="case reveal" id="pipelines">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">MLOps &middot; production models</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2023 &ndash; present</dd><dt>Role</dt><dd>Maintain, modify and extend</dd><dt>Stack</dt><dd>Azure ML, Python, Databricks, dbt, CI/CD</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">Keeping load-bearing models honest</h3>
+        <div class="prose"><h4>The work nobody writes case studies about</h4><p>Several commercial scoring models were already in production when I arrived and are relied on by people who will never read a model card: share of wallet, cross-sales propensity, customer onboarding. My job across these has been maintaining, modifying and extending the Azure ML pipelines behind them.</p><p>This is less glamorous than building something new and considerably more consequential. A model that has been quietly wrong for two quarters has already changed how a sales organisation spends its time.</p><h4>What that involves in practice</h4><ul><li>Reworking pipelines as the upstream data model changes — new source systems, changed definitions, categories that split or merge</li><li>Investigating drift and deciding whether it is the world changing or the pipeline breaking, which are not the same problem and have opposite fixes</li><li>Retraining and validation runs that are repeatable rather than heroic</li><li>Making sure the features a model consumes mean the same thing they did when it was trained</li></ul></div>
+        <p class="callout" style="margin-top:1.8rem">The expensive failures are not models that break. They are models that keep answering.</p>
+      </div>
+    </article>
+    <article class="case reveal" id="scoring">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">Machine learning &middot; commercial</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2025 &ndash; 2026</dd><dt>Role</dt><dd>Data scientist, end to end</dd><dt>Stack</dt><dd>Databricks, dbt, SQL, Power BI &amp; DAX, React / Vite</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">Scoring which customers deserve the next hour</h3>
+        <div class="prose"><h4>The problem</h4><p>A sales organisation has a finite number of hours and a very long customer list. The implicit ranking — who gets called, who gets a visit, who gets forgotten — is usually a mix of history, habit and whoever shouted most recently.</p><p>The question was whether an explicit, defensible score could do better: which accounts look most like the ones we serve well and profitably, and which are furthest from their own potential.</p><h4>What I built</h4><ul><li>A modelled customer table in Databricks, built through dbt so the definitions live in version control instead of in six people's spreadsheets</li><li>A scoring approach combining fit against an ideal-customer profile with signals of unrealised potential, so a high score means something a salesperson can act on</li><li>Delivery in two shapes: a Power BI template with the measures written in DAX, so any region can drop in its own data, and a React application for the interactive view — six report pages in total</li></ul><h4>Where it landed</h4><p>The part I would defend hardest is the delivery decision. A score that lives in a notebook changes nothing. Shipping the same logic as a template someone can open, filter and argue with is what turns it from an analysis into a tool — and the arguing is the point, because that is where the definition gets sharpened.</p></div>
+        <p class="callout" style="margin-top:1.8rem">A model nobody opens is not a model. It is a file.</p>
+      </div>
+    </article>
+    <article class="case reveal" id="platform">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">Data engineering</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2023 &ndash; present</dd><dt>Role</dt><dd>Data scientist, platform-adjacent</dd><dt>Stack</dt><dd>Databricks, dbt, SQL, Kafka, Azure, Kubernetes, Power BI, Streamlit</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">Keeping the platform honest</h3>
+        <div class="prose"><h4>The unglamorous half of the job</h4><p>None of the work above exists without a platform that behaves. A representative slice:</p><ul><li>Debugging deduplication logic in Databricks mart tables — the class of bug that silently inflates every number downstream and is invisible until someone senior asks why two reports disagree</li><li>Diagnosing an Azure conditional-access and token-cache failure that blocked Kubernetes authentication, which is the sort of thing that stops a whole team until one person reads the actual error</li><li>Tracing a Power BI semantic-model regression to a breaking change in a Microsoft connector rather than to our own code — and being able to prove it</li><li>Building a Streamlit upload path so business users can get their own data into the Databricks/dbt world without a ticket and a two-week wait</li><li>Sales forecasting treated as a product rather than a report: modelled history, repeatable scoring, and actual-versus-target reporting so accuracy is visible instead of assumed</li></ul><h4>Why it is on this page</h4><p>Because it is roughly half of what a working data scientist does, and a CV that hides it is describing a job that does not exist.</p></div>
+        <p class="callout" style="margin-top:1.8rem">&ldquo;The pipeline is fine&rdquo; is the single most expensive sentence in data work.</p>
+      </div>
+    </article>
+    <article class="case reveal" id="congestion">
+      <div class="case-aside">
+        <p class="eyebrow is-plain">Personal project &middot; open data</p>
+        <dl class="case-meta"><dt>Context</dt><dd>Personal project</dd><dt>Role</dt><dd>Sole author</dd><dt>Stack</dt><dd>Python, pandas, scikit-learn, Power BI</dd><dt>Data</dt><dd>V&auml;sttrafik open data</dd></dl>
+      </div>
+      <div class="case-body">
+        <h3 class="h-md">Where a tram network actually jams</h3>
+        <div class="prose"><h4>The question</h4><p>Public transport operators know when a service is late. It is harder to say <em>where</em> a network is structurally congested — which stops and time bands consistently absorb delay, as opposed to being unlucky on a particular Tuesday.</p><h4>The approach</h4><ul><li>V&auml;sttrafik open data for the Gothenburg region, cleaned and reshaped into stop-level observations across time bands</li><li>Unsupervised clustering with k-means and DBSCAN, used together deliberately: k-means for structured groupings, DBSCAN because the interesting cases are often the ones that refuse to join a cluster</li><li>A composite congestion score, so results are comparable across stops rather than only interpretable within one</li><li>A published Power BI dashboard, because analysis that ends as a PDF gets read once</li></ul><h4>See it</h4><p><a class="btn btn-primary" href="dashboards.html#vasttrafik">Open the live dashboard <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p></div>
+        <p class="callout" style="margin-top:1.8rem">DBSCAN earns its place here precisely because it is allowed to say &ldquo;this one belongs nowhere&rdquo;.</p>
+      </div>
+    </article></div></section>
+<section class="band">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Open projects</p>
+      <h2 class="h-lg">Code and reports you can read</h2>
+      <p>Personal and academic projects, every one of them open on GitHub with the written report
+         where there is one. They are studies rather than products, and they are here because
+         reading someone's code and their write-up tells you more than a skills list does.</p>
+    </div>
+    <div class="grid grid-2">
+        <article class="card reveal">
+          <h3 class="h-sm">Customer churn &amp; retention in banking</h3>
+          <p class="muted small">Logistic regression on complaint and retention behaviour, with the statistical work to check whether the regional differences were real. Written up as a full analysis report.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">Logistic regression</span><span class="chip">Statistics</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/UC2SAT102_KRISTOFER_DEYOUNG_V1.pdf">Read the report <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Analytics-in-Banking-An-Examination-of-Customer-Churn-and-Retention-Rates" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">New York yellow-taxi demand</h3>
+          <p class="muted small">Descriptive and predictive analysis of demand, peak periods and fare revenue — including what a record blizzard does to a demand model. Linear, polynomial and random-forest regression compared.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">Regression</span><span class="chip">Random forest</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/Kristofer_DeYoung_Analysis_of_NYC_taxi_service.pdf">Read the report <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Analysis-report-NewYork-medallion-taxis" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">Garment factory productivity</h3>
+          <p class="muted small">Production performance across departments and seasons, working through outliers, missing values and input errors to something a plant manager could act on.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">EDA</span><span class="chip">Data quality</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/Kristofer_DeYoung_Analysis_of_garment_factories_productivity.pdf">Read the report <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Analysis-report-garment-factory-productivity" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">Fake-news detection with BERT</h3>
+          <p class="muted small">Group project on classifying article legitimacy. BERT performed best, but generalised poorly to unseen datasets — which turned out to be the more interesting finding.</p>
+          <div class="chips"><span class="chip">NLP</span><span class="chip">BERT</span><span class="chip">Transformers</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/UC1ST1104_FakeNewsDetectives.pdf">Read the report <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/FakeNewsNLP" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">Modular imputer — strategy &amp; factory patterns</h3>
+          <p class="muted small">A custom imputer where the imputation strategy (mean, mode, median) is swappable at runtime. An exercise in design patterns applied to something genuinely useful.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">OOP</span><span class="chip">Design patterns</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/Imputer/OOP Guidance 10 - Portfolio BOTH Imputer and Factory v1.html">Walkthrough <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Imputer-modular--mean-mod-and-median" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">CPU scheduling simulator</h3>
+          <p class="muted small">FIFO, shortest-job-first, priority and round-robin scheduling implemented side by side, so the trade-offs between average wait and context-switch overhead are visible rather than asserted.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">Operating systems</span><span class="chip">Algorithms</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="https://github.com/DeyoSwed/Python-Simulation-Cpu-Scheduler/blob/main/CPU_scheduler_all.py" rel="noopener" target="_blank">Source <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Python-Simulation-Cpu-Scheduler" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article>
+        <article class="card reveal">
+          <h3 class="h-sm">Bank prototype — object-oriented design</h3>
+          <p class="muted small">A teaching prototype demonstrating encapsulation, inheritance, polymorphism and abstraction on a domain where getting the abstractions wrong is expensive.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">OOP</span><span class="chip">UML</span></div>
+          <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.7rem"><a class="link-arrow" href="portfolio/bank/UC2OOP101_Kristofer_DeYoung_1.html">Walkthrough <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a> <a class="link-arrow" href="https://github.com/DeyoSwed/Bank-demo-Object-Oriented-Programming" rel="noopener" target="_blank">GitHub <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6.5 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-3M9.5 2h4.5v4.5M13.5 2.5 7 9" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+        </article></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="split">
+      <div class="stack">
+        <p class="eyebrow">Live</p>
+        <h2 class="h-lg">Dashboards you can click</h2>
+        <p class="muted">Four published Power BI reports — the congestion model, plus a retail
+           analysis and two visualisation studies from 2024. They are embedded and public, so you
+           can filter and drill rather than take my word for it.</p>
+        <p><a class="btn btn-primary" href="dashboards.html">Open the dashboards <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
+      </div>
+      <figure style="border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md)">
+        <picture><source type="image/webp" srcset="assets/img/pier.webp"><img src="assets/img/pier.jpg" alt="A long pier stretching out to sea at sunset" width="720" height="419" loading="lazy" decoding="async"></picture>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band-ink">
+  <div class="wrap">
+    <div class="contact-grid">
+      <div class="stack">
+        <p class="eyebrow">Next step</p>
+        <h2 class="h-lg">Want the version with the numbers in it?</h2>
+        <p>Most of what is generalised above has a concrete story behind it. I am glad to walk
+           through any of it — what worked, what did not, and what I would do differently.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href="mailto:kristofer.deyoung@gmail.com"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.75" y="3.25" width="12.5" height="9.5" rx="1.5"/><path d="m2.5 4.5 5.5 4 5.5-4" stroke-linecap="round" stroke-linejoin="round"/></svg> Email me</a>
+        <a class="btn" style="background:transparent;border-color:#4a443e;color:#f2ede6"
+           href="about.html">About &amp; CV <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2.5 8h11M9 3.5 13.5 8 9 12.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3>Get in touch</h3>
+        <p class="muted" style="max-width:34ch">Happy to talk about applied machine learning, LLM systems in production, or what a data team should build next.</p>
+        <p style="margin-top:.9rem"><a href="mailto:kristofer.deyoung@gmail.com">kristofer.deyoung@gmail.com</a></p>
+        <p class="small muted">Gothenburg, Sweden &middot; CET</p>
+        <div class="socials">
+          <a href="https://www.linkedin.com/in/kristofer-deyoung/" rel="me noopener" target="_blank"><span class="visually-hidden">LinkedIn</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13Zm1.78 13.02H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg></a>
+          <a href="https://github.com/DeyoSwed" rel="me noopener" target="_blank"><span class="visually-hidden">GitHub</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.1.82-.26.82-.58v-2.2c-3.34.72-4.04-1.42-4.04-1.42-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.53.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.23 0 4.63-2.8 5.65-5.48 5.95.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .5Z"/></svg></a>
+          <a href="mailto:kristofer.deyoung@gmail.com"><span class="visually-hidden">Email</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="2.5" y="4.75" width="19" height="14.5" rx="2"/><path d="m3.6 6.2 8.4 6.3 8.4-6.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h3>Pages</h3>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="work.html">Work</a></li>
+          <li><a href="about.html">About &amp; CV</a></li>
+          <li><a href="beyond.html">Beyond work</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Elsewhere</h3>
+        <ul>
+          <li><a href="https://www.linkedin.com/in/kristofer-deyoung/" rel="noopener" target="_blank">LinkedIn</a></li>
+          <li><a href="https://github.com/DeyoSwed" rel="noopener" target="_blank">GitHub</a></li>
+          <li><a href="dashboards.html">Live dashboards</a></li>
+          <li><a href="assets/cv/Kristofer-DeYoung-CV.pdf">CV (PDF)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>&copy; Kristofer DeYoung. Built by hand — no framework, no tracking.</span>
+      <span>Last updated September 2026</span>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>

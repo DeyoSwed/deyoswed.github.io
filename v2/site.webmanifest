@@ -1,0 +1,21 @@
+{
+  "name": "Kristofer DeYoung (preview)",
+  "short_name": "K. DeYoung",
+  "description": "Data scientist and AI engineer in Gothenburg, Sweden.",
+  "start_url": "/v2/",
+  "display": "browser",
+  "background_color": "#faf8f5",
+  "theme_color": "#faf8f5",
+  "icons": [
+    {
+      "src": "/v2/assets/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/v2/assets/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
