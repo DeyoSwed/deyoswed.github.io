@@ -73,7 +73,6 @@
   if (!shots || !shots.length) return;
 
   var img = document.getElementById("lb-img");
-  var webp = document.getElementById("lb-webp");
   var cap = document.getElementById("lb-cap");
   var inner = box.querySelector(".lightbox-inner");
   var closeBtn = box.querySelector(".lb-close");
@@ -85,9 +84,8 @@
   function show(i) {
     index = (i + shots.length) % shots.length;
     var s = shots[index];
-    webp.srcset = s.webp;
     img.src = s.src;
-    img.alt = s.alt;
+    img.alt = s.cap;
     cap.textContent = s.cap;
   }
 
