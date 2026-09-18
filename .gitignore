@@ -1,7 +1,1 @@
-# local staging for the full-detail branch — never committed to main
-_full/
-
-# Claude scratch output
-Claude outputs/
-
 *:Zone.Identifier
