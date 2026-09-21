@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Work — Kristofer DeYoung</title>
-<meta name="description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<meta name="description" content="Kristofer DeYoung: personal and open-source data science projects, plus live Power BI dashboards. Employer case studies are temporarily offline pending internal sign-off.">
 <link rel="canonical" href="https://www.kristoferdeyoung.com/work.html">
 <meta name="author" content="Kristofer DeYoung">
 <meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Kristofer DeYoung">
 <meta property="og:title" content="Work — Kristofer DeYoung">
-<meta property="og:description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<meta property="og:description" content="Kristofer DeYoung: personal and open-source data science projects, plus live Power BI dashboards. Employer case studies are temporarily offline pending internal sign-off.">
 <meta property="og:url" content="https://www.kristoferdeyoung.com/work.html">
 <meta property="og:image" content="https://www.kristoferdeyoung.com/assets/img/og-cover.jpg">
 <meta property="og:image:width" content="1200">
@@ -22,7 +22,7 @@
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Work — Kristofer DeYoung">
-<meta name="twitter:description" content="Case studies from Kristofer DeYoung: LLM document extraction into an ERP order flow, a market-flows framework measured against a holdout, Azure ML pipelines, customer prioritisation scoring, plus open-source projects and live Power BI dashboards.">
+<meta name="twitter:description" content="Kristofer DeYoung: personal and open-source data science projects, plus live Power BI dashboards. Employer case studies are temporarily offline pending internal sign-off.">
 <meta name="twitter:image" content="https://www.kristoferdeyoung.com/assets/img/og-cover.jpg">
 
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
@@ -57,73 +57,18 @@
     <div class="section-head" style="margin-bottom:1.5rem">
       <p class="eyebrow">Work</p>
       <h1 class="h-xl" style="max-width:16ch">What I have actually built</h1>
-      <p class="lede" style="max-width:56ch">Six pieces of work, then the open projects and the live
-        dashboards. The employer cases are described generically &mdash; the approach and the
-        trade-offs are the interesting part anyway.</p>
+      <p class="lede" style="max-width:56ch">The open-source projects, then the live dashboards.
+        Employer case studies are temporarily offline &mdash; see the note below.</p>
     </div>
     <div class="note" style="max-width:60ch">
-      <strong>On confidentiality.</strong> Employer work is written up generically: no customer
-      names, no internal figures, and no detail that would be useful to a competitor. Happy to go
-      a level deeper in conversation, within what is mine to share.
+      <strong>On the employer case studies.</strong> The write-ups for my current role are down for
+      now while I get sign-off to publish project detail publicly. They will be back once that is
+      sorted, and I am glad to walk through any of it directly in the meantime. The open-source and
+      personal work below is unaffected.
     </div>
   </div>
 </section>
 <section class="tight"><div class="wrap">
-    <article class="case reveal" id="documents">
-      <div class="case-aside">
-        <p class="eyebrow is-plain">Applied AI &middot; in production</p>
-        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2025 &ndash; present</dd><dt>Role</dt><dd>Owner &mdash; modelling, backend, cloud, DevOps, front end</dd><dt>Stack</dt><dd>Azure OpenAI, Python, Terraform, Kubernetes, Azure DevOps, REST APIs, EDI &amp; ERP</dd></dl>
-      </div>
-      <div class="case-body">
-        <h3 class="h-md">A pilot that had defeated four years of attempts</h3>
-        <div class="prose"><h4>The problem</h4><p>A large share of customer orders never arrives as clean EDI. They arrive as PDFs — exported from a customer's own ERP, scanned, screenshotted, forwarded, or assembled by hand in Excel and printed. Every one of them has to become structured order lines in the ERP, and until recently a person did that by reading the document and typing.</p><p>The idea was not new. The project had been open for roughly four years, and capable people had taken a run at it before me. The technology was not the blocker — by the end there were capable models available to anyone. The blocker was that nobody had defined the problem tightly enough for a solution to be finishable.</p><h4>What I changed</h4><p>I started by narrowing it. Not &lsquo;parse any document&rsquo; but: which fields, at what confidence, for which document families, failing how, and into which existing order path. Once that was written down, most of the work became ordinary engineering.</p><ul><li>Extraction against a strict output schema rather than free text, so a bad response is detectable instead of plausible</li><li>Defaulting and enrichment for the fields customers routinely omit — ship-to, order class, whether the order must ship complete</li><li>Throttling, back-off and retry handling; the difference between a demo and something that runs unattended at volume</li><li>Infrastructure as code with Terraform, deployment on Kubernetes, pipelines in Azure DevOps</li><li>New API endpoints and the front end for the human-review path, because the parts a person touches decide whether the automated parts get trusted</li><li>An evaluation set of real documents, scored per field, so improvement is a measurement rather than an opinion</li></ul><h4>Where it landed</h4><p>It runs. Over recent months the volume of AI-parsed billed orders has grown close to exponentially, and the ceiling now is adoption and document supply rather than the system.</p><p>The honest lesson is not a flattering one about me. Several capable people had worked on this. What I brought was not better modelling — it was being willing to spend the first weeks arguing about scope instead of building.</p></div>
-        <p class="callout" style="margin-top:1.8rem">The interesting engineering in an LLM feature is almost never the prompt. It is the schema, the retries, the review path and the evaluation set.</p>
-      </div>
-    </article>
-    <article class="case reveal" id="flows">
-      <div class="case-aside">
-        <p class="eyebrow is-plain">Commercial ML &middot; measured</p>
-        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2024 &ndash; present</dd><dt>Role</dt><dd>Designed and built the framework</dd><dt>Stack</dt><dd>Python, Azure, dbt, Databricks, holdout design</dd></dl>
-      </div>
-      <div class="case-body">
-        <h3 class="h-md">Measured against a holdout, not against last year</h3>
-        <div class="prose"><h4>The problem</h4><p>A distributor generates an enormous number of small commercial signals every day: a basket left behind, an order that stops repeating, a customer who has quietly moved a category to someone else. Each one is individually trivial and collectively enormous, and almost none of them were being acted on in any systematic way.</p><p>The trap is to build a one-off campaign for each. That produces something that works once, cannot be evaluated, and nobody maintains.</p><h4>What I built</h4><p>A reusable framework for triggered commercial flows — the shared machinery for detecting a signal, deciding whether it warrants contact, executing, and measuring. Individual flows become configuration rather than new projects.</p><ul><li>Signal definitions modelled in dbt so the meaning of a trigger is in version control, not in someone's head</li><li>Eligibility and suppression rules, so the business never has to choose between acting and annoying its customers</li><li><b>A holdout group built in from the first flow</b> — a randomly withheld population that receives nothing, so incremental effect is measurable rather than inferred from a before/after chart</li><li>Reporting that reads the holdout comparison continuously rather than at launch</li></ul><h4>Where it landed</h4><p>The first flow built on it was abandoned cart. Compared against its holdout group it produces a <b>material and sustained lift in incremental conversion</b> — enough on its own to justify building the framework rather than another campaign. Several further flows have since been built on the same framework, which was the actual objective — the first flow was the proof, not the product.</p><p>The holdout is the part I would defend hardest. Attribution in commercial analytics is mostly wishful, and the standard alternative — comparing to last year — would have credited this with a far larger and completely unreliable number.</p></div>
-        <p class="callout" style="margin-top:1.8rem">Any flow can look like it worked. A holdout group is the cheapest honest answer to &ldquo;compared to what?&rdquo;</p>
-      </div>
-    </article>
-    <article class="case reveal" id="pipelines">
-      <div class="case-aside">
-        <p class="eyebrow is-plain">MLOps &middot; production models</p>
-        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2023 &ndash; present</dd><dt>Role</dt><dd>Maintain, modify and extend</dd><dt>Stack</dt><dd>Azure ML, Python, Databricks, dbt, CI/CD</dd></dl>
-      </div>
-      <div class="case-body">
-        <h3 class="h-md">Keeping load-bearing models honest</h3>
-        <div class="prose"><h4>The work nobody writes case studies about</h4><p>Several commercial scoring models were already in production when I arrived and are relied on by people who will never read a model card: share of wallet, cross-sales propensity, customer onboarding. My job across these has been maintaining, modifying and extending the Azure ML pipelines behind them.</p><p>This is less glamorous than building something new and considerably more consequential. A model that has been quietly wrong for two quarters has already changed how a sales organisation spends its time.</p><h4>What that involves in practice</h4><ul><li>Reworking pipelines as the upstream data model changes — new source systems, changed definitions, categories that split or merge</li><li>Investigating drift and deciding whether it is the world changing or the pipeline breaking, which are not the same problem and have opposite fixes</li><li>Retraining and validation runs that are repeatable rather than heroic</li><li>Making sure the features a model consumes mean the same thing they did when it was trained</li></ul></div>
-        <p class="callout" style="margin-top:1.8rem">The expensive failures are not models that break. They are models that keep answering.</p>
-      </div>
-    </article>
-    <article class="case reveal" id="scoring">
-      <div class="case-aside">
-        <p class="eyebrow is-plain">Machine learning &middot; commercial</p>
-        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2025 &ndash; 2026</dd><dt>Role</dt><dd>Data scientist, end to end</dd><dt>Stack</dt><dd>Databricks, dbt, SQL, Power BI &amp; DAX, React / Vite</dd></dl>
-      </div>
-      <div class="case-body">
-        <h3 class="h-md">Scoring which customers deserve the next hour</h3>
-        <div class="prose"><h4>The problem</h4><p>A sales organisation has a finite number of hours and a very long customer list. The implicit ranking — who gets called, who gets a visit, who gets forgotten — is usually a mix of history, habit and whoever shouted most recently.</p><p>The question was whether an explicit, defensible score could do better: which accounts look most like the ones we serve well and profitably, and which are furthest from their own potential.</p><h4>What I built</h4><ul><li>A modelled customer table in Databricks, built through dbt so the definitions live in version control instead of in six people's spreadsheets</li><li>A scoring approach combining fit against an ideal-customer profile with signals of unrealised potential, so a high score means something a salesperson can act on</li><li>Delivery in two shapes: a Power BI template with the measures written in DAX, so any region can drop in its own data, and a React application for the interactive view — six report pages in total</li></ul><h4>Where it landed</h4><p>The part I would defend hardest is the delivery decision. A score that lives in a notebook changes nothing. Shipping the same logic as a template someone can open, filter and argue with is what turns it from an analysis into a tool — and the arguing is the point, because that is where the definition gets sharpened.</p></div>
-        <p class="callout" style="margin-top:1.8rem">A model nobody opens is not a model. It is a file.</p>
-      </div>
-    </article>
-    <article class="case reveal" id="platform">
-      <div class="case-aside">
-        <p class="eyebrow is-plain">Data engineering</p>
-        <dl class="case-meta"><dt>Context</dt><dd>Nordic B2B distribution &middot; ~50 bn SEK, 7,000+ staff</dd><dt>Years</dt><dd>2023 &ndash; present</dd><dt>Role</dt><dd>Data scientist, platform-adjacent</dd><dt>Stack</dt><dd>Databricks, dbt, SQL, Kafka, Azure, Kubernetes, Power BI, Streamlit</dd></dl>
-      </div>
-      <div class="case-body">
-        <h3 class="h-md">Keeping the platform honest</h3>
-        <div class="prose"><h4>The unglamorous half of the job</h4><p>None of the work above exists without a platform that behaves. A representative slice:</p><ul><li>Deduplication and grain defects in warehouse mart tables — the class of bug that propagates silently into every number downstream and only surfaces when two reports disagree</li><li>Identity, conditional-access and token-lifetime failures that block cluster authentication — the kind of cross-system error that halts a team until somebody reads the actual trace instead of guessing</li><li>Semantic-model regressions traced to an upstream connector change rather than to our own code — and being able to demonstrate which it was</li><li>Building a Streamlit upload path so business users can get their own data into the Databricks/dbt world without a ticket and a two-week wait</li><li>Sales forecasting treated as a product rather than a report: modelled history, repeatable scoring, and actual-versus-target reporting so accuracy is visible instead of assumed</li></ul><h4>Why it is on this page</h4><p>Because it is roughly half of what a working data scientist does, and a CV that hides it is describing a job that does not exist.</p></div>
-        <p class="callout" style="margin-top:1.8rem">&ldquo;The pipeline is fine&rdquo; is the single most expensive sentence in data work.</p>
-      </div>
-    </article>
     <article class="case reveal" id="congestion">
       <div class="case-aside">
         <p class="eyebrow is-plain">Personal project &middot; open data</p>
