@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Turn any picture into a bead pattern for Hama, Perler or Panduro plates.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pärlplatta — bead pattern maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDF2; --surface:#FFFFFF; --ink:#1A2130; --muted:#5A6474; --line:#CBD3DD;
+  --accent:#2445C8; --accent-ink:#FFFFFF; --board:#F4F6F9; --peg:#D5DCE5; --plate-line:#2445C8;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161D; --surface:#1B212B; --ink:#E8ECF2; --muted:#9AA5B5; --line:#2C3542;
+    --accent:#7D96FF; --accent-ink:#0D1220; --board:#232A35; --peg:#323B48; --plate-line:#7D96FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161D; --surface:#1B212B; --ink:#E8ECF2; --muted:#9AA5B5; --line:#2C3542;
+  --accent:#7D96FF; --accent-ink:#0D1220; --board:#232A35; --peg:#323B48; --plate-line:#7D96FF;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Figtree",system-ui,sans-serif;line-height:1.15;margin:0}
+h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.15rem;font-weight:700}
+h3{font-size:1rem;font-weight:500}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 0 16px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.layout{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:920px){.layout{grid-template-columns:340px 1fr;align-items:start}.controls{position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.controls{display:flex;flex-direction:column;gap:14px}
+.group{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.group:last-child{border-bottom:0;padding-bottom:0}
+label.row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.95rem}
+.hint{color:var(--muted);font-size:.85rem;margin:0}
+select,input[type=number]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+select{width:100%}
+input[type=number]{width:76px;text-align:center}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:9px 14px;min-height:42px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;cursor:pointer;display:flex;gap:12px;align-items:center}
+.drop.over{border-color:var(--accent)}
+.drop img,.drop canvas{width:64px;height:64px;object-fit:cover;border-radius:8px;flex:none;background:var(--bg)}
+.drop span{text-align:left;font-size:.92rem}
+.steppers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stepper{display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.stepper div{display:flex;align-items:center;gap:6px}
+.stepper button{min-width:40px;padding:6px}
+.pegs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.pegs label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.pegs input{width:100%}
+.output{display:flex;flex-direction:column;gap:16px;min-width:0}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.95rem}
+.stats b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem;font-weight:700;margin-right:4px}
+.stage{overflow:auto;border-radius:10px;background:var(--board);touch-action:pan-x pan-y pinch-zoom}
+.stage canvas{display:block;margin:0 auto;cursor:pointer}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.platepick{display:grid;gap:4px;justify-content:start}
+.platepick button{min-width:38px;min-height:38px;padding:4px;font-size:.85rem}
+.platepick button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}
+.legend .item{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:.88rem}
+.sw{width:22px;height:22px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);position:relative}
+.sw::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface);opacity:.55}
+.legend .count{margin-left:auto;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:4px;max-height:180px;overflow:auto;padding:2px}
+.chip{width:30px;height:30px;min-height:0;padding:0;border-radius:50%;border:2px solid transparent;position:relative}
+.chip[aria-pressed="false"]{opacity:.22}
+.chip[aria-pressed="true"]{border-color:var(--ink)}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.note{font-size:.85rem;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+[hidden]{display:none!important}
+@media (max-width:919px){.output{order:-1}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Pärlplatta</h1>
+      <p>Turn any picture into a bead pattern. Add more plates for more detail, pick your bead brand, and build it plate by plate.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel controls" aria-label="Pattern settings">
+      <div class="group">
+        <h2>Picture</h2>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a picture">
+          <canvas id="thumb" width="128" height="128"></canvas>
+          <span><b>Choose a picture</b><br><span class="note">Tap to pick a photo or take one. You can also drop or paste an image here.</span></span>
+        </div>
+        <input type="file" id="file" accept="image/*" class="sr" tabindex="-1">
+        <label class="row">Framing
+          <select id="fit" style="width:auto">
+            <option value="cover">Fill plates (crop edges)</option>
+            <option value="contain">Fit whole picture</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="group">
+        <h2>Beads and plates</h2>
+        <select id="standard" aria-label="Bead standard"></select>
+        <div class="pegs">
+          <label>Pegs across<input type="number" id="pegW" min="4" max="100"></label>
+          <label>Pegs down<input type="number" id="pegH" min="4" max="100"></label>
+          <label>Bead size, mm<input type="number" id="pitch" min="1" max="20" step="0.5"></label>
+        </div>
+        <p class="hint" id="stdNote"></p>
+        <div class="steppers">
+          <div class="stepper"><span>Plates across</span><div><button data-step="px:-1" aria-label="Fewer plates across">−</button><b id="pxv">2</b><button data-step="px:1" aria-label="More plates across">+</button></div></div>
+          <div class="stepper"><span>Plates down</span><div><button data-step="py:-1" aria-label="Fewer plates down">−</button><b id="pyv">2</b><button data-step="py:1" aria-label="More plates down">+</button></div></div>
+        </div>
+        <button id="matchShape">Match the picture’s shape</button>
+      </div>
+
+      <div class="group">
+        <h2>Colours</h2>
+        <label class="row">Most colours to use<span><b id="maxcv">16</b></span></label>
+        <input type="range" id="maxc" min="2" max="40" value="16">
+        <label class="row"><span>Blend with dithering</span><input type="checkbox" id="dither"></label>
+        <label class="row"><span>Remove stray single beads</span><input type="checkbox" id="clean" checked></label>
+        <label class="row">Contrast<span id="conv">0</span></label>
+        <input type="range" id="con" min="-50" max="50" value="0">
+        <label class="row">Saturation<span id="satv">0</span></label>
+        <input type="range" id="sat" min="-50" max="80" value="0">
+        <div class="section-head"><h3>Colours you have</h3><button id="allc" style="min-height:34px;padding:4px 10px">Use all</button></div>
+        <p class="hint">Tap a colour to leave it out of the pattern.</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </aside>
+
+    <main class="output">
+      <section class="panel">
+        <div class="section-head" style="margin-bottom:12px">
+          <div class="tabs" role="group" aria-label="View">
+            <button class="primary" id="pickTop">Choose picture</button>
+            <button id="tabAll" aria-pressed="true">Whole pattern</button>
+            <button id="tabPlate" aria-pressed="false">Plate by plate</button>
+          </div>
+          <div class="tabs" role="group" aria-label="Bead look">
+            <button id="lookBead" aria-pressed="true">Beads</button>
+            <button id="lookIron" aria-pressed="false">Ironed</button>
+            <button id="lookPhoto" aria-pressed="false">Original</button>
+          </div>
+        </div>
+        <div class="stats" id="stats" aria-live="polite"></div>
+        <div id="plateBar" hidden style="margin:12px 0 4px">
+          <p class="hint" style="margin-bottom:6px">Pick a plate. Numbers on the beads are colour codes; plates count from the top left.</p>
+          <div class="platepick" id="platepick"></div>
+        </div>
+        <div class="stage" id="stage" style="margin-top:12px"><canvas id="view"></canvas></div>
+        <div class="btns" id="saveBtns" style="margin-top:12px" hidden>
+          <button class="primary" id="savePng">Save pattern as image</button>
+          <button id="saveCsv">Save bead list</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head" style="margin-bottom:10px">
+          <h2 id="legendTitle">Beads you need</h2>
+          <span class="note" id="legendNote"></span>
+        </div>
+        <div class="legend" id="legend"></div>
+        <p class="note" style="margin:12px 0 0">Bead colours on screen are close approximations of each brand’s range — check against your actual beads before buying in bulk.</p>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------- Palettes (approximate on-screen values) ----------
+const HAMA = [
+ ["01","White","#FFFFFF"],["02","Cream","#F1E7C9"],["03","Yellow","#F6D80F"],["04","Orange","#F08A1C"],
+ ["05","Red","#C8222C"],["06","Pink","#F2A4C4"],["07","Purple","#6B3A8E"],["08","Blue","#1F3B8E"],
+ ["09","Light blue","#3B82C8"],["10","Green","#1E8B48"],["11","Light green","#5DB45B"],["12","Brown","#6B3B20"],
+ ["17","Grey","#8E8E8E"],["18","Black","#1C1C1C"],["20","Reddish brown","#8D3B28"],["21","Light brown","#B4783E"],
+ ["22","Dark red","#8B1D2A"],["26","Flesh","#F2B79C"],["27","Beige","#D6C29A"],["28","Dark green","#1F4729"],
+ ["29","Claret","#8C1F48"],["30","Burgundy","#6C1529"],["31","Turquoise","#2BA1B5"],["32","Fuchsia","#E0468D"],
+ ["33","Cerise","#D21F5B"],["43","Pastel yellow","#F6EC8E"],["44","Pastel red","#F08E8C"],["45","Pastel purple","#B497D3"],
+ ["46","Pastel blue","#8CB5E2"],["47","Pastel green","#A2D3A0"],["48","Pastel pink","#F1BFD3"],["49","Azure","#47B5E6"],
+ ["60","Teddy bear brown","#A2663C"],["61","Kiwi","#A9C93A"],["70","Light grey","#C9C9C9"],["71","Dark grey","#505254"],
+ ["75","Tan","#C9A27A"],["76","Nougat","#B58D66"],["77","Ice","#E6F0F2"],["78","Peach","#F7C9A8"],
+ ["79","Apricot","#F4A65E"],["82","Plum","#7C2E5E"],["83","Petrol","#1D6F78"],["84","Olive","#6F7A2E"]
+];
+const PERLER = [
+ ["P01","White","#F1F1F1"],["P02","Cream","#E0DEA9"],["P03","Yellow","#ECD800"],["P04","Orange","#ED6120"],
+ ["P05","Red","#BF2E40"],["P06","Bubblegum","#DD6698"],["P07","Purple","#604089"],["P08","Dark blue","#2B3F87"],
+ ["P09","Light blue","#3374C0"],["P10","Dark green","#1C753E"],["P11","Light green","#56BA9F"],["P12","Brown","#513931"],
+ ["P17","Grey","#8A8D91"],["P18","Black","#2E2F32"],["P20","Rust","#8C3B2C"],["P21","Light brown","#815D34"],
+ ["P33","Peach","#EEBAB2"],["P35","Tan","#CFA889"],["P38","Magenta","#F22B97"],["P52","Pastel blue","#6797D0"],
+ ["P53","Pastel green","#76C882"],["P54","Pastel lavender","#9E7CC2"],["P56","Pastel yellow","#FEF68A"],["P57","Cheddar","#F1AA0C"],
+ ["P58","Toothpaste","#93C8D4"],["P59","Hot coral","#FF3756"],["P60","Plum","#A24B9C"],["P61","Kiwi lime","#6CBE13"],
+ ["P62","Turquoise","#2B89C6"],["P63","Blush","#FF8B90"],["P79","Light pink","#F6B3DD"],["P80","Bright green","#47B95F"],
+ ["P83","Pink","#E44892"],["P88","Raspberry","#A5306E"],["P90","Butterscotch","#D48B31"],["P91","Parrot green","#0E7A6E"],
+ ["P92","Dark grey","#4D5156"],["P96","Cranapple","#801F35"],["P97","Prickly pear","#BED452"],["P98","Sand","#E4CC9E"]
+];
+const STANDARDS = {
+  "hama-midi":{label:"Hama Midi — 5 mm",pegs:[29,29],pitch:5,pal:"hama",note:"The common Swedish/Danish bead. Large square plate is 29 × 29 pegs."},
+  "panduro":{label:"Panduro / Creativ Company medium — 5 mm",pegs:[29,29],pitch:5,pal:"hama",note:"Medium 5 mm beads fit Hama Midi plates; colours matched to the Hama range. Adjust pegs if your plate is different."},
+  "perler":{label:"Perler — 5 mm",pegs:[29,29],pitch:5,pal:"perler",note:"US brand. Large square pegboard is 29 × 29."},
+  "hama-mini":{label:"Hama Mini — 2.5 mm",pegs:[48,48],pitch:2.5,pal:"hama",note:"Half-size beads for fine detail. Check the peg count on your own plate and adjust."},
+  "hama-maxi":{label:"Hama Maxi — 10 mm",pegs:[16,16],pitch:10,pal:"hama",note:"Big beads for small hands. Check the peg count on your own plate and adjust."},
+  "custom":{label:"Custom plate",pegs:[30,30],pitch:5,pal:"hama",note:"Set your own peg count and bead size."}
+};
+const PALETTES = {hama:HAMA, perler:PERLER};
+
+// ---------- Colour maths ----------
+function hexToRgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function lin(c){c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}
+function rgbToLab(r,g,b){
+  r=lin(r);g=lin(g);b=lin(b);
+  let x=(r*0.4124+g*0.3576+b*0.1805)/0.95047, y=r*0.2126+g*0.7152+b*0.0722, z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;
+  const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;
+  x=f(x);y=f(y);z=f(z);
+  return[116*y-16,500*(x-y),200*(y-z)];
+}
+// CIE94 distance — perceptual enough, fast enough
+function dE(a,b){
+  const dL=a[0]-b[0], C1=Math.hypot(a[1],a[2]), C2=Math.hypot(b[1],b[2]), dC=C1-C2;
+  const da=a[1]-b[1], db=a[2]-b[2]; let dH2=da*da+db*db-dC*dC; if(dH2<0)dH2=0;
+  const sC=1+0.045*C1, sH=1+0.015*C1;
+  return dL*dL+(dC/sC)**2+dH2/(sH*sH);
+}
+function lum(rgb){return 0.2126*lin(rgb[0])+0.7152*lin(rgb[1])+0.0722*lin(rgb[2])}
+
+// ---------- State ----------
+const S = {std:"hama-midi",pegW:29,pegH:29,pitch:5,px:2,py:2,fit:"cover",maxc:16,dither:false,clean:true,con:0,sat:0,
+  disabled:{hama:new Set(),perler:new Set()},view:"all",look:"bead",plate:0,src:null,grid:null,W:0,H:0,used:[],srcSmall:null};
+const $=id=>document.getElementById(id);
+const toast=(m)=>{const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600)};
+
+// ---------- Sample picture so the page is never empty ----------
+function sampleImage(){
+  const c=document.createElement("canvas");c.width=400;c.height=400;const x=c.getContext("2d");
+  const g=x.createLinearGradient(0,0,0,260);g.addColorStop(0,"#2b4a9e");g.addColorStop(.6,"#f08a5d");g.addColorStop(1,"#f6d36b");
+  x.fillStyle=g;x.fillRect(0,0,400,400);
+  x.fillStyle="#fff2b0";x.beginPath();x.arc(200,220,70,0,Math.PI*2);x.fill();
+  x.fillStyle="#1e6b45";x.beginPath();x.moveTo(0,300);x.quadraticCurveTo(110,220,220,290);x.quadraticCurveTo(320,240,400,280);x.lineTo(400,400);x.lineTo(0,400);x.fill();
+  x.fillStyle="#123d2c";x.beginPath();x.moveTo(0,350);x.quadraticCurveTo(160,290,400,340);x.lineTo(400,400);x.lineTo(0,400);x.fill();
+  x.fillStyle="#1f3b8e";x.fillRect(0,372,400,28);
+  return c;
+}
+
+// ---------- Loading pictures ----------
+function loadFile(file){
+  if(!file||!file.type.startsWith("image/")){toast("That file isn’t a picture. Choose a JPG, PNG, HEIC or WebP.");return}
+  const url=URL.createObjectURL(file); const img=new Image();
+  img.onload=()=>{S.src=img;drawThumb();generate();};
+  img.onerror=()=>toast("This picture format can’t be opened here. Try saving it as JPG or PNG.");
+  img.src=url;
+}
+function drawThumb(){
+  const t=$("thumb"),x=t.getContext("2d");const w=S.src.naturalWidth||S.src.width,h=S.src.naturalHeight||S.src.height;
+  const s=Math.max(128/w,128/h);x.clearRect(0,0,128,128);x.drawImage(S.src,(128-w*s)/2,(128-h*s)/2,w*s,h*s);
+}
+
+// ---------- Pattern generation ----------
+function activePalette(){
+  const key=STANDARDS[S.std].pal;
+  return PALETTES[key].filter(p=>!S.disabled[key].has(p[0])).map(p=>{const rgb=hexToRgb(p[2]);return{code:p[0],name:p[1],hex:p[2],rgb,lab:rgbToLab(...rgb)}});
+}
+function sampleSource(W,H){
+  const K=Math.max(1,Math.min(6,Math.floor(1600/Math.max(W,H))));
+  const c=document.createElement("canvas");c.width=W*K;c.height=H*K;const x=c.getContext("2d",{willReadFrequently:true});
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";
+  const sw=S.src.naturalWidth||S.src.width, sh=S.src.naturalHeight||S.src.height;
+  const tr=W/H, ir=sw/sh;
+  if(S.fit==="cover"){
+    let cw=sw,ch=sh; if(ir>tr){cw=sh*tr}else{ch=sw/tr}
+    x.drawImage(S.src,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,c.width,c.height);
+  }else{
+    let dw=c.width,dh=c.height; if(ir>tr){dh=c.width/ir}else{dw=c.height*ir}
+    x.drawImage(S.src,0,0,sw,sh,(c.width-dw)/2,(c.height-dh)/2,dw,dh);
+  }
+  const d=x.getImageData(0,0,c.width,c.height).data;
+  const out=new Float32Array(W*H*4);
+  for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){
+    let r=0,g=0,b=0,a=0;
+    for(let j=0;j<K;j++)for(let i=0;i<K;i++){const o=((y*K+j)*c.width+(xx*K+i))*4;const al=d[o+3]/255;r+=d[o]*al;g+=d[o+1]*al;b+=d[o+2]*al;a+=al}
+    const o=(y*W+xx)*4; if(a>0){out[o]=r/a;out[o+1]=g/a;out[o+2]=b/a} out[o+3]=a/(K*K);
+  }
+  // contrast + saturation
+  const cf=1+S.con/50, sf=1+S.sat/50;
+  for(let i=0;i<W*H;i++){const o=i*4;let r=out[o],g=out[o+1],b=out[o+2];
+    r=(r-128)*cf+128;g=(g-128)*cf+128;b=(b-128)*cf+128;
+    const l=0.299*r+0.587*g+0.114*b; r=l+(r-l)*sf;g=l+(g-l)*sf;b=l+(b-l)*sf;
+    out[o]=Math.min(255,Math.max(0,r));out[o+1]=Math.min(255,Math.max(0,g));out[o+2]=Math.min(255,Math.max(0,b));}
+  return out;
+}
+function quantize(px,W,H,pal,dither){
+  const grid=new Int16Array(W*H).fill(-1); const cache=new Map();
+  const nearest=(r,g,b)=>{const k=((r>>2)<<12)|((g>>2)<<6)|(b>>2);let v=cache.get(k);if(v!==undefined)return v;
+    const lab=rgbToLab(r,g,b);let best=0,bd=Infinity;for(let i=0;i<pal.length;i++){const d=dE(lab,pal[i].lab);if(d<bd){bd=d;best=i}}cache.set(k,best);return best};
+  const buf=dither?Float32Array.from(px):px;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,o=i*4; if(buf[o+3]<0.5)continue;
+    const r=Math.round(Math.min(255,Math.max(0,buf[o]))),g=Math.round(Math.min(255,Math.max(0,buf[o+1]))),b=Math.round(Math.min(255,Math.max(0,buf[o+2])));
+    const k=nearest(r,g,b);grid[i]=k;
+    if(dither){const p=pal[k].rgb, s=0.75, e=[(r-p[0])*s,(g-p[1])*s,(b-p[2])*s];
+      const push=(dx,dy,w)=>{const xx=x+dx,yy=y+dy;if(xx<0||xx>=W||yy>=H)return;const q=(yy*W+xx)*4;if(buf[q+3]<0.5)return;buf[q]+=e[0]*w;buf[q+1]+=e[1]*w;buf[q+2]+=e[2]*w};
+      push(1,0,7/16);push(-1,1,3/16);push(0,1,5/16);push(1,1,1/16);}
+  }
+  return grid;
+}
+function cleanup(grid,W,H){
+  const out=Int16Array.from(grid);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,c=grid[i];if(c<0)continue;
+    const n=[];if(x>0)n.push(grid[i-1]);if(x<W-1)n.push(grid[i+1]);if(y>0)n.push(grid[i-W]);if(y<H-1)n.push(grid[i+W]);
+    if(n.includes(c)||n.length<3)continue;
+    const cnt={};let best=c,bc=0;for(const v of n){if(v<0)continue;cnt[v]=(cnt[v]||0)+1;if(cnt[v]>bc){bc=cnt[v];best=v}}
+    if(bc>=2)out[i]=best;}
+  return out;
+}
+function generate(){
+  if(!S.src)return;
+  const W=S.px*S.pegW,H=S.py*S.pegH; S.W=W;S.H=H;
+  let pal=activePalette();
+  if(pal.length<2){toast("Keep at least two colours switched on.");return}
+  const px=sampleSource(W,H); S.srcSmall=px;
+  let grid=quantize(px,W,H,pal,false);
+  if(pal.length>S.maxc){
+    const counts=new Array(pal.length).fill(0);for(const v of grid)if(v>=0)counts[v]++;
+    const keep=counts.map((c,i)=>[c,i]).sort((a,b)=>b[0]-a[0]).slice(0,S.maxc).filter(k=>k[0]>0).map(k=>k[1]);
+    pal=keep.map(i=>pal[i]);
+  }
+  grid=quantize(px,W,H,pal,S.dither);
+  if(S.clean)grid=cleanup(grid,W,H);
+  // compact to used colours
+  const counts=new Array(pal.length).fill(0);for(const v of grid)if(v>=0)counts[v]++;
+  const map=new Int16Array(pal.length).fill(-1);const used=[];
+  counts.map((c,i)=>[c,i]).filter(k=>k[0]>0).sort((a,b)=>b[0]-a[0]).forEach(([c,i])=>{map[i]=used.length;used.push({...pal[i],count:c})});
+  for(let i=0;i<grid.length;i++)if(grid[i]>=0)grid[i]=map[grid[i]];
+  S.grid=grid;S.used=used;
+  if(S.plate>=S.px*S.py)S.plate=0;
+  render();
+}
+
+// ---------- Rendering ----------
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function drawCells(x,x0,y0,w,h,cell,opts){
+  const {grid,W,used}=S; const board=css("--board"),peg=css("--peg");
+  x.fillStyle=board;x.fillRect(0,0,x.canvas.width,x.canvas.height);
+  for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
+    const gx=x0+xx,gy=y0+yy,i=gy*W+gx,cx=opts.ox+xx*cell,cy=opts.oy+yy*cell;
+    if(S.look==="photo"){const o=i*4,a=S.srcSmall[o+3];if(a<0.5){dot(peg,cx,cy,cell,0.18);continue}
+      x.fillStyle=`rgb(${S.srcSmall[o]|0},${S.srcSmall[o+1]|0},${S.srcSmall[o+2]|0})`;x.fillRect(cx,cy,cell,cell);continue}
+    const k=grid[i];
+    if(k<0){dot(peg,cx,cy,cell,0.18);continue}
+    const c=used[k];
+    if(S.look==="iron"){x.fillStyle=c.hex;x.fillRect(cx,cy,cell+0.5,cell+0.5)}
+    else{x.fillStyle=c.hex;x.beginPath();x.arc(cx+cell/2,cy+cell/2,cell*0.46,0,Math.PI*2);x.fill();
+      if(cell>=5){x.fillStyle=board;x.globalAlpha=.85;x.beginPath();x.arc(cx+cell/2,cy+cell/2,cell*0.17,0,Math.PI*2);x.fill();x.globalAlpha=1}}
+    if(opts.codes&&S.look!=="photo"){x.fillStyle=lum(c.rgb)>0.35?"#000":"#fff";
+      x.font=`700 ${Math.round(cell*(c.code.length>2?0.3:0.36))}px Figtree, sans-serif`;
+      x.textAlign="center";x.textBaseline="middle";
+      if(S.look==="bead"){x.fillStyle=lum(c.rgb)>0.35?"#000":"#fff";x.save();x.globalAlpha=1;
+        x.fillStyle=c.hex;x.beginPath();x.arc(cx+cell/2,cy+cell/2,cell*0.3,0,Math.PI*2);x.fill();x.restore();x.fillStyle=lum(c.rgb)>0.35?"#000":"#fff"}
+      x.fillText(c.code.replace(/^P/,""),cx+cell/2,cy+cell/2+0.5);}
+  }
+  function dot(col,cx,cy,cell,r){x.fillStyle=col;x.beginPath();x.arc(cx+cell/2,cy+cell/2,Math.max(0.6,cell*r),0,Math.PI*2);x.fill()}
+}
+function setupCanvas(cv,w,h){const dpr=Math.min(3,window.devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+"px";cv.style.height=h+"px";const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return x}
+function render(){
+  if(!S.grid)return;
+  const stage=$("stage"),cv=$("view"),avail=Math.max(260,stage.clientWidth-2);
+  const {W,H,pegW,pegH}=S;
+  if(S.view==="all"){
+    const cell=Math.max(2,Math.min(22,Math.floor(avail/W*10)/10));
+    const x=setupCanvas(cv,W*cell,H*cell);
+    drawCells(x,0,0,W,H,cell,{ox:0,oy:0,codes:false});
+    x.strokeStyle=css("--plate-line");x.lineWidth=Math.max(1.5,cell*0.18);x.globalAlpha=.8;
+    for(let i=1;i<S.px;i++){x.beginPath();x.moveTo(i*pegW*cell,0);x.lineTo(i*pegW*cell,H*cell);x.stroke()}
+    for(let j=1;j<S.py;j++){x.beginPath();x.moveTo(0,j*pegH*cell);x.lineTo(W*cell,j*pegH*cell);x.stroke()}
+    x.globalAlpha=1;cv._cell=cell;
+  }else{
+    const pxI=S.plate%S.px,pyI=Math.floor(S.plate/S.px);
+    const cell=Math.max(20,Math.floor((avail-28)/pegW)); const m=24;
+    const x=setupCanvas(cv,m+pegW*cell+4,m+pegH*cell+4);
+    drawCells(x,pxI*pegW,pyI*pegH,pegW,pegH,cell,{ox:m,oy:m,codes:true});
+    x.fillStyle=css("--surface");x.fillRect(0,0,m,cv.height);x.fillRect(0,0,cv.width,m);
+    x.fillStyle=css("--muted");x.font="12px Figtree, sans-serif";x.textAlign="center";x.textBaseline="middle";
+    for(let i=0;i<pegW;i++)if(i===0||(i+1)%5===0)x.fillText(i+1,m+i*cell+cell/2,m/2);
+    for(let j=0;j<pegH;j++)if(j===0||(j+1)%5===0)x.fillText(j+1,m/2,m+j*cell+cell/2);
+    x.strokeStyle=css("--line");x.lineWidth=1;
+    for(let i=5;i<pegW;i+=5){x.beginPath();x.moveTo(m+i*cell,m);x.lineTo(m+i*cell,m+pegH*cell);x.stroke()}
+    for(let j=5;j<pegH;j+=5){x.beginPath();x.moveTo(m,m+j*cell);x.lineTo(m+pegW*cell,m+j*cell);x.stroke()}
+  }
+  renderStats();renderLegend();renderPlatePick();
+}
+function plateCounts(p){
+  const pxI=p%S.px,pyI=Math.floor(p/S.px),c=new Array(S.used.length).fill(0);
+  for(let y=0;y<S.pegH;y++)for(let x=0;x<S.pegW;x++){const k=S.grid[(pyI*S.pegH+y)*S.W+pxI*S.pegW+x];if(k>=0)c[k]++}
+  return c;
+}
+function renderStats(){
+  const total=S.used.reduce((a,c)=>a+c.count,0);
+  const wcm=(S.W*S.pitch/10).toFixed(1).replace(".0",""),hcm=(S.H*S.pitch/10).toFixed(1).replace(".0","");
+  $("stats").innerHTML=`<span><b>${S.W} × ${S.H}</b>beads</span><span><b>${S.px*S.py}</b>${S.px*S.py===1?"plate":"plates"} (${S.px} × ${S.py})</span><span><b>${wcm} × ${hcm}</b>cm finished</span><span><b>${total.toLocaleString("sv-SE")}</b>beads total</span><span><b>${S.used.length}</b>colours</span>`;
+}
+function renderLegend(){
+  const plate=S.view==="plate";const counts=plate?plateCounts(S.plate):S.used.map(c=>c.count);
+  $("legendTitle").textContent=plate?`Beads for plate ${S.plate+1}`:"Beads you need";
+  $("legendNote").textContent=plate?`${counts.reduce((a,b)=>a+b,0)} beads on this plate`:"Buy roughly 10 % extra for strays";
+  $("legend").innerHTML=S.used.map((c,i)=>counts[i]?`<div class="item"><span class="sw" style="background:${c.hex}"></span><span><b>${c.code}</b> ${c.name}</span><span class="count">${counts[i].toLocaleString("sv-SE")}</span></div>`:"").join("");
+}
+function renderPlatePick(){
+  $("plateBar").hidden=S.view!=="plate";if(S.view!=="plate")return;
+  const pp=$("platepick");pp.style.gridTemplateColumns=`repeat(${S.px},38px)`;
+  pp.innerHTML=Array.from({length:S.px*S.py},(_,i)=>`<button data-plate="${i}" aria-pressed="${i===S.plate}" aria-label="Plate ${i+1}">${i+1}</button>`).join("");
+}
+function renderChips(){
+  const key=STANDARDS[S.std].pal;
+  $("chips").innerHTML=PALETTES[key].map(p=>`<button class="chip" style="background:${p[2]}" data-code="${p[0]}" aria-pressed="${!S.disabled[key].has(p[0])}" title="${p[0]} ${p[1]}" aria-label="${p[0]} ${p[1]}"></button>`).join("");
+}
+
+// ---------- Controls ----------
+function applyStandard(){
+  const st=STANDARDS[S.std];S.pegW=st.pegs[0];S.pegH=st.pegs[1];S.pitch=st.pitch;
+  $("pegW").value=S.pegW;$("pegH").value=S.pegH;$("pitch").value=S.pitch;$("stdNote").textContent=st.note;renderChips();
+}
+$("standard").innerHTML=Object.entries(STANDARDS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join("");
+$("standard").addEventListener("change",e=>{S.std=e.target.value;applyStandard();generate()});
+["pegW","pegH"].forEach(id=>$(id).addEventListener("change",e=>{const v=Math.max(4,Math.min(100,parseInt(e.target.value)||29));e.target.value=v;S[id]=v;generate()}));
+$("pitch").addEventListener("change",e=>{S.pitch=Math.max(1,parseFloat(e.target.value)||5);renderStats()});
+document.querySelectorAll("[data-step]").forEach(b=>b.addEventListener("click",()=>{const[k,d]=b.dataset.step.split(":");S[k]=Math.max(1,Math.min(12,S[k]+ +d));$(k+"v").textContent=S[k];generate()}));
+$("matchShape").addEventListener("click",()=>{
+  const w=S.src.naturalWidth||S.src.width,h=S.src.naturalHeight||S.src.height;
+  const py=Math.max(1,Math.min(12,Math.round(S.px*S.pegW*h/w/S.pegH)));S.py=py;$("pyv").textContent=py;generate();
+  toast(`Set to ${S.px} × ${py} plates to match the picture.`);
+});
+$("fit").addEventListener("change",e=>{S.fit=e.target.value;generate()});
+let deb;const later=()=>{clearTimeout(deb);deb=setTimeout(generate,120)};
+$("maxc").addEventListener("input",e=>{S.maxc=+e.target.value;$("maxcv").textContent=S.maxc;later()});
+$("con").addEventListener("input",e=>{S.con=+e.target.value;$("conv").textContent=S.con;later()});
+$("sat").addEventListener("input",e=>{S.sat=+e.target.value;$("satv").textContent=S.sat;later()});
+$("dither").addEventListener("change",e=>{S.dither=e.target.checked;generate()});
+$("clean").addEventListener("change",e=>{S.clean=e.target.checked;generate()});
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const set=S.disabled[STANDARDS[S.std].pal];
+  set.has(b.dataset.code)?set.delete(b.dataset.code):set.add(b.dataset.code);b.setAttribute("aria-pressed",!set.has(b.dataset.code));later()});
+$("allc").addEventListener("click",()=>{S.disabled[STANDARDS[S.std].pal].clear();renderChips();generate()});
+function setView(v){S.view=v;$("tabAll").setAttribute("aria-pressed",v==="all");$("tabPlate").setAttribute("aria-pressed",v==="plate");render()}
+$("tabAll").addEventListener("click",()=>setView("all"));
+$("tabPlate").addEventListener("click",()=>setView("plate"));
+function setLook(l){S.look=l;["Bead","Iron","Photo"].forEach(n=>$("look"+n).setAttribute("aria-pressed",l===n.toLowerCase()));render()}
+$("lookBead").addEventListener("click",()=>setLook("bead"));
+$("lookIron").addEventListener("click",()=>setLook("iron"));
+$("lookPhoto").addEventListener("click",()=>setLook("photo"));
+$("platepick").addEventListener("click",e=>{const b=e.target.closest("[data-plate]");if(!b)return;S.plate=+b.dataset.plate;render()});
+$("view").addEventListener("click",e=>{ if(S.view!=="all")return;
+  const r=e.target.getBoundingClientRect(),cell=e.target._cell;const gx=Math.floor((e.clientX-r.left)/cell),gy=Math.floor((e.clientY-r.top)/cell);
+  S.plate=Math.min(S.py-1,Math.floor(gy/S.pegH))*S.px+Math.min(S.px-1,Math.floor(gx/S.pegW));setView("plate");
+});
+// picture input
+const drop=$("drop");
+drop.addEventListener("click",()=>$("file").click());
+$("pickTop").addEventListener("click",()=>$("file").click());
+drop.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}});
+$("file").addEventListener("change",e=>loadFile(e.target.files[0]));
+drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("over")});
+drop.addEventListener("dragleave",()=>drop.classList.remove("over"));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("over");loadFile(e.dataTransfer.files[0])});
+document.addEventListener("paste",e=>{const it=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith("image/"));if(it)loadFile(it.getAsFile())});
+let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(render,150)});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+
+// ---------- Saving ----------
+$("saveBtns").hidden=false;
+function save(filename,data){
+  const blob=data instanceof Blob?data:new Blob([data],{type:filename.endsWith(".csv")?"text/csv;charset=utf-8":"application/octet-stream"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Saved.");
+}
+$("savePng").addEventListener("click",()=>{
+  // Printable sheet: whole pattern + one page-section per plate with codes
+  const {pegW,pegH,px,py}=S;const cell=24,m=28,gap=40;
+  const plateW=m+pegW*cell, plateH=m+pegH*cell+30;
+  const cols=Math.min(px,2);const rows=Math.ceil(px*py/cols);
+  const ovCell=Math.max(4,Math.floor((cols*plateW+(cols-1)*gap)/S.W));
+  const sheetW=Math.max(cols*plateW+(cols-1)*gap,S.W*ovCell)+2*gap;
+  const sheetH=gap+40+S.H*ovCell+gap+rows*(plateH+gap)+gap;
+  const c=document.createElement("canvas");c.width=sheetW;c.height=sheetH;const x=c.getContext("2d");
+  const saveLook=S.look;if(S.look==="photo")S.look="bead";
+  const root=document.documentElement,prev=root.getAttribute("data-theme");root.setAttribute("data-theme","light");
+  x.fillStyle="#fff";x.fillRect(0,0,sheetW,sheetH);
+  x.fillStyle="#1A2130";x.font="700 26px Bricolage Grotesque, sans-serif";x.fillText(`${STANDARDS[S.std].label} — ${S.W} × ${S.H} beads, ${px} × ${py} plates`,gap,gap+20);
+  const sub=document.createElement("canvas");
+  const drawInto=(cw,ch,fn)=>{sub.width=cw;sub.height=ch;const sx=sub.getContext("2d");sx.setTransform(1,0,0,1,0,0);fn(sx);return sub};
+  x.drawImage(drawInto(S.W*ovCell,S.H*ovCell,sx=>{drawCells(sx,0,0,S.W,S.H,ovCell,{ox:0,oy:0,codes:false});sx.strokeStyle="#2445C8";sx.lineWidth=2;
+    for(let i=1;i<px;i++){sx.beginPath();sx.moveTo(i*pegW*ovCell,0);sx.lineTo(i*pegW*ovCell,S.H*ovCell);sx.stroke()}
+    for(let j=1;j<py;j++){sx.beginPath();sx.moveTo(0,j*pegH*ovCell);sx.lineTo(S.W*ovCell,j*pegH*ovCell);sx.stroke()}}),gap,gap+40);
+  for(let p=0;p<px*py;p++){
+    const col=p%cols,row=Math.floor(p/cols),ox=gap+col*(plateW+gap),oy=gap+40+S.H*ovCell+gap+row*(plateH+gap);
+    x.fillStyle="#1A2130";x.font="700 18px Bricolage Grotesque, sans-serif";x.fillText(`Plate ${p+1} (column ${p%px+1}, row ${Math.floor(p/px)+1})`,ox,oy+18);
+    x.drawImage(drawInto(plateW,plateW,sx=>{drawCells(sx,(p%px)*pegW,Math.floor(p/px)*pegH,pegW,pegH,cell,{ox:m,oy:m,codes:true});
+      sx.fillStyle="#fff";sx.fillRect(0,0,m,sub.height);sx.fillRect(0,0,sub.width,m);sx.fillStyle="#5A6474";sx.font="12px sans-serif";sx.textAlign="center";sx.textBaseline="middle";
+      for(let i=0;i<pegW;i++)if(i===0||(i+1)%5===0)sx.fillText(i+1,m+i*cell+cell/2,m/2);
+      for(let j=0;j<pegH;j++)if(j===0||(j+1)%5===0)sx.fillText(j+1,m/2,m+j*cell+cell/2);}),ox,oy+30);
+  }
+  prev?root.setAttribute("data-theme",prev):root.removeAttribute("data-theme");S.look=saveLook;
+  c.toBlob(b=>save("parlplatta-pattern.png",b),"image/png");
+});
+$("saveCsv").addEventListener("click",()=>{
+  const head=["Code","Colour","Total",...Array.from({length:S.px*S.py},(_,i)=>`Plate ${i+1}`)];
+  const per=Array.from({length:S.px*S.py},(_,i)=>plateCounts(i));
+  const rows=S.used.map((c,k)=>[c.code,c.name,c.count,...per.map(p=>p[k])]);
+  save("parlplatta-beads.csv",[head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"));
+});
+
+// ---------- Start ----------
+applyStandard();
+S.src=sampleImage();drawThumb();generate();
+</script>
+</body>
+</html>
