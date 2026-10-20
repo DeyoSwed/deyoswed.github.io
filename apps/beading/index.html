@@ -71,7 +71,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
 .stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.95rem}
 .stats b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem;font-weight:700;margin-right:4px}
 .stage{overflow:auto;border-radius:10px;background:var(--board);touch-action:pan-x pan-y pinch-zoom}
-.stage canvas{display:block;margin:0 auto;cursor:pointer}
+.stage canvas{display:block;margin:0 auto}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .platepick{display:grid;gap:4px;justify-content:start}
@@ -93,6 +93,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 [hidden]{display:none!important}
 @media (max-width:919px){.output{order:-1}}
+dialog#cropDlg{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:16px;width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;display:none;flex-direction:column;gap:10px}
+dialog#cropDlg[open]{display:flex}
+dialog#cropDlg::backdrop{background:rgba(10,14,22,.55)}
+.cropstage{display:flex;justify-content:center;background:var(--board);border-radius:10px;overflow:hidden}
+#cropCv{touch-action:none;display:block;cursor:crosshair}
+#cropCv:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 </head>
@@ -114,6 +120,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
           <span><b>Choose a picture</b><br><span class="note">Tap to pick a photo or take one. You can also drop or paste an image here.</span></span>
         </div>
         <input type="file" id="file" accept="image/*" class="sr" tabindex="-1">
+        <div class="btns"><button id="cropBtn">Crop picture</button><button id="cropReset" hidden>Use whole picture</button></div>
+        <p class="hint" id="cropState" aria-live="polite"></p>
         <label class="row">Framing
           <select id="fit" style="width:auto">
             <option value="cover">Fill plates (crop edges)</option>
@@ -159,6 +167,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
         <div class="section-head" style="margin-bottom:12px">
           <div class="tabs" role="group" aria-label="View">
             <button class="primary" id="pickTop">Choose picture</button>
+            <button id="cropTop">Crop</button>
             <button id="tabAll" aria-pressed="true">Whole pattern</button>
             <button id="tabPlate" aria-pressed="false">Plate by plate</button>
           </div>
@@ -176,6 +185,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
         <div class="stage" id="stage" style="margin-top:12px"><canvas id="view"></canvas></div>
         <div class="btns" id="saveBtns" style="margin-top:12px" hidden>
           <button class="primary" id="savePng">Save pattern as image</button>
+          <button id="savePlate" hidden>Save this plate</button>
           <button id="saveCsv">Save bead list</button>
         </div>
       </section>
@@ -191,6 +201,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visibl
     </main>
   </div>
 </div>
+<dialog id="cropDlg" aria-labelledby="cropTitle">
+  <h2 id="cropTitle">Crop picture</h2>
+  <p class="hint">Drag the frame to move it, drag a corner to resize, or drag outside the frame to draw a new one. Dashed lines show where plates meet.</p>
+  <div id="cropStage" class="cropstage"><canvas id="cropCv" tabindex="0" aria-label="Crop frame. Arrow keys move it; Shift and arrow keys resize it."></canvas></div>
+  <label class="row"><span>Keep the shape of your plates</span><input type="checkbox" id="cropLock" checked></label>
+  <div class="btns"><button class="primary" id="cropApply">Use this crop</button><button id="cropWhole">Select whole picture</button><button id="cropCancel">Cancel</button></div>
+</dialog>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -250,7 +267,7 @@ function dE(a,b){
 function lum(rgb){return 0.2126*lin(rgb[0])+0.7152*lin(rgb[1])+0.0722*lin(rgb[2])}
 
 // ---------- State ----------
-const S = {std:"hama-midi",pegW:29,pegH:29,pitch:5,px:2,py:2,fit:"cover",maxc:16,dither:false,clean:true,con:0,sat:0,
+const S = {crop:null,cropLock:true,std:"hama-midi",pegW:29,pegH:29,pitch:5,px:2,py:2,fit:"cover",maxc:16,dither:false,clean:true,con:0,sat:0,
   disabled:{hama:new Set(),perler:new Set()},view:"all",look:"bead",plate:0,src:null,grid:null,W:0,H:0,used:[],srcSmall:null};
 const $=id=>document.getElementById(id);
 const toast=(m)=>{const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600)};
@@ -271,13 +288,13 @@ function sampleImage(){
 function loadFile(file){
   if(!file||!file.type.startsWith("image/")){toast("That file isn’t a picture. Choose a JPG, PNG, HEIC or WebP.");return}
   const url=URL.createObjectURL(file); const img=new Image();
-  img.onload=()=>{S.src=img;drawThumb();generate();};
+  img.onload=()=>{S.src=img;S.crop=null;syncCropUi();drawThumb();generate();};
   img.onerror=()=>toast("This picture format can’t be opened here. Try saving it as JPG or PNG.");
   img.src=url;
 }
 function drawThumb(){
-  const t=$("thumb"),x=t.getContext("2d");const w=S.src.naturalWidth||S.src.width,h=S.src.naturalHeight||S.src.height;
-  const s=Math.max(128/w,128/h);x.clearRect(0,0,128,128);x.drawImage(S.src,(128-w*s)/2,(128-h*s)/2,w*s,h*s);
+  const t=$("thumb"),x=t.getContext("2d"),r=cropPx();
+  const s=Math.max(128/r.w,128/r.h);x.clearRect(0,0,128,128);x.drawImage(S.src,r.x,r.y,r.w,r.h,(128-r.w*s)/2,(128-r.h*s)/2,r.w*s,r.h*s);
 }
 
 // ---------- Pattern generation ----------
@@ -289,14 +306,14 @@ function sampleSource(W,H){
   const K=Math.max(1,Math.min(6,Math.floor(1600/Math.max(W,H))));
   const c=document.createElement("canvas");c.width=W*K;c.height=H*K;const x=c.getContext("2d",{willReadFrequently:true});
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";
-  const sw=S.src.naturalWidth||S.src.width, sh=S.src.naturalHeight||S.src.height;
+  const cr=cropPx(),sx0=cr.x,sy0=cr.y,sw=cr.w,sh=cr.h;
   const tr=W/H, ir=sw/sh;
   if(S.fit==="cover"){
     let cw=sw,ch=sh; if(ir>tr){cw=sh*tr}else{ch=sw/tr}
-    x.drawImage(S.src,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,c.width,c.height);
+    x.drawImage(S.src,sx0+(sw-cw)/2,sy0+(sh-ch)/2,cw,ch,0,0,c.width,c.height);
   }else{
     let dw=c.width,dh=c.height; if(ir>tr){dh=c.width/ir}else{dw=c.height*ir}
-    x.drawImage(S.src,0,0,sw,sh,(c.width-dw)/2,(c.height-dh)/2,dw,dh);
+    x.drawImage(S.src,sx0,sy0,sw,sh,(c.width-dw)/2,(c.height-dh)/2,dw,dh);
   }
   const d=x.getImageData(0,0,c.width,c.height).data;
   const out=new Float32Array(W*H*4);
@@ -340,6 +357,7 @@ function cleanup(grid,W,H){
 function generate(){
   if(!S.src)return;
   const W=S.px*S.pegW,H=S.py*S.pegH; S.W=W;S.H=H;
+  if(S.crop&&S.cropLock){S.crop=normCrop(lockRect(cropPx()));drawThumb();syncCropUi()}
   let pal=activePalette();
   if(pal.length<2){toast("Keep at least two colours switched on.");return}
   const px=sampleSource(W,H); S.srcSmall=px;
@@ -385,7 +403,7 @@ function drawCells(x,x0,y0,w,h,cell,opts){
   }
   function dot(col,cx,cy,cell,r){x.fillStyle=col;x.beginPath();x.arc(cx+cell/2,cy+cell/2,Math.max(0.6,cell*r),0,Math.PI*2);x.fill()}
 }
-function setupCanvas(cv,w,h){const dpr=Math.min(3,window.devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+"px";cv.style.height=h+"px";const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return x}
+function setupCanvas(cv,w,h){const dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1,Math.sqrt(14e6/(w*h))));cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+"px";cv.style.height=h+"px";const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return x}
 function render(){
   if(!S.grid)return;
   const stage=$("stage"),cv=$("view"),avail=Math.max(260,stage.clientWidth-2);
@@ -430,7 +448,7 @@ function renderLegend(){
   $("legend").innerHTML=S.used.map((c,i)=>counts[i]?`<div class="item"><span class="sw" style="background:${c.hex}"></span><span><b>${c.code}</b> ${c.name}</span><span class="count">${counts[i].toLocaleString("sv-SE")}</span></div>`:"").join("");
 }
 function renderPlatePick(){
-  $("plateBar").hidden=S.view!=="plate";if(S.view!=="plate")return;
+  $("plateBar").hidden=S.view!=="plate";$("savePlate").hidden=S.view!=="plate";$("view").style.cursor=S.view==="all"?"pointer":"default";if(S.view!=="plate")return;
   const pp=$("platepick");pp.style.gridTemplateColumns=`repeat(${S.px},38px)`;
   pp.innerHTML=Array.from({length:S.px*S.py},(_,i)=>`<button data-plate="${i}" aria-pressed="${i===S.plate}" aria-label="Plate ${i+1}">${i+1}</button>`).join("");
 }
@@ -450,7 +468,7 @@ $("standard").addEventListener("change",e=>{S.std=e.target.value;applyStandard()
 $("pitch").addEventListener("change",e=>{S.pitch=Math.max(1,parseFloat(e.target.value)||5);renderStats()});
 document.querySelectorAll("[data-step]").forEach(b=>b.addEventListener("click",()=>{const[k,d]=b.dataset.step.split(":");S[k]=Math.max(1,Math.min(12,S[k]+ +d));$(k+"v").textContent=S[k];generate()}));
 $("matchShape").addEventListener("click",()=>{
-  const w=S.src.naturalWidth||S.src.width,h=S.src.naturalHeight||S.src.height;
+  const {w,h}=cropPx();
   const py=Math.max(1,Math.min(12,Math.round(S.px*S.pegW*h/w/S.pegH)));S.py=py;$("pyv").textContent=py;generate();
   toast(`Set to ${S.px} × ${py} plates to match the picture.`);
 });
@@ -481,13 +499,92 @@ const drop=$("drop");
 drop.addEventListener("click",()=>$("file").click());
 $("pickTop").addEventListener("click",()=>$("file").click());
 drop.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}});
-$("file").addEventListener("change",e=>loadFile(e.target.files[0]));
+$("file").addEventListener("change",e=>{loadFile(e.target.files[0]);e.target.value=""});
 drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("over")});
 drop.addEventListener("dragleave",()=>drop.classList.remove("over"));
 drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("over");loadFile(e.dataTransfer.files[0])});
 document.addEventListener("paste",e=>{const it=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith("image/"));if(it)loadFile(it.getAsFile())});
 let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(render,150)});
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+
+// ---------- Crop ----------
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const imgDims=()=>[S.src.naturalWidth||S.src.width,S.src.naturalHeight||S.src.height];
+const plateAspect=()=>(S.px*S.pegW)/(S.py*S.pegH);
+function cropPx(){const[iw,ih]=imgDims();const c=S.crop||{x:0,y:0,w:1,h:1};return{x:c.x*iw,y:c.y*ih,w:c.w*iw,h:c.h*ih}}
+function lockRect(r){ // keep centre, match plate shape, stay inside picture
+  const[iw,ih]=imgDims(),a=plateAspect();let w=r.w,h=r.h;const cx=r.x+w/2,cy=r.y+h/2;
+  if(w/h>a)w=h*a;else h=w/a; if(w>iw){w=iw;h=w/a} if(h>ih){h=ih;w=h*a}
+  return{x:clamp(cx-w/2,0,iw-w),y:clamp(cy-h/2,0,ih-h),w,h};
+}
+function normCrop(r){const[iw,ih]=imgDims();if(r.w>=iw*0.995&&r.h>=ih*0.995)return null;return{x:r.x/iw,y:r.y/ih,w:r.w/iw,h:r.h/ih}}
+function syncCropUi(){$("cropReset").hidden=!S.crop;$("cropState").textContent=S.crop?"Using a cropped part of the picture.":""}
+const CR={r:null,scale:1,pad:14,drag:null};
+function openCrop(){
+  if(!S.src)return;
+  CR.r=S.crop?cropPx():(S.cropLock?lockRect(cropPx()):cropPx());
+  $("cropLock").checked=S.cropLock;$("cropDlg").showModal();sizeCrop();$("cropCv").focus();
+}
+function sizeCrop(){
+  const[iw,ih]=imgDims(),stage=$("cropStage"),aw=stage.clientWidth,ah=Math.min(innerHeight*0.62,620);
+  const P=CR.pad,s=Math.min((aw-2*P)/iw,(ah-2*P)/ih);CR.scale=s;const cv=$("cropCv");const x=setupCanvas(cv,Math.round(iw*s)+2*P,Math.round(ih*s)+2*P);drawCrop();
+}
+function drawCrop(){
+  const cv=$("cropCv"),x=cv.getContext("2d"),s=CR.scale,[iw,ih]=imgDims(),r=CR.r,W=iw*s,H=ih*s;
+  x.setTransform(1,0,0,1,0,0);const dpr=cv.width/(W+2*CR.pad);x.setTransform(dpr,0,0,dpr,CR.pad*dpr,CR.pad*dpr);
+  x.clearRect(-CR.pad,-CR.pad,W+2*CR.pad,H+2*CR.pad);x.drawImage(S.src,0,0,W,H);
+  x.fillStyle="rgba(10,14,22,.6)";
+  x.fillRect(0,0,W,r.y*s);x.fillRect(0,(r.y+r.h)*s,W,H-(r.y+r.h)*s);x.fillRect(0,r.y*s,r.x*s,r.h*s);x.fillRect((r.x+r.w)*s,r.y*s,W-(r.x+r.w)*s,r.h*s);
+  x.strokeStyle="#fff";x.lineWidth=2;x.strokeRect(r.x*s+1,r.y*s+1,r.w*s-2,r.h*s-2);
+  // plate lines inside the frame, so you see where plates will join
+  x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=1;x.setLineDash([4,4]);
+  for(let i=1;i<S.px;i++){const xx=(r.x+r.w*i/S.px)*s;x.beginPath();x.moveTo(xx,r.y*s);x.lineTo(xx,(r.y+r.h)*s);x.stroke()}
+  for(let j=1;j<S.py;j++){const yy=(r.y+r.h*j/S.py)*s;x.beginPath();x.moveTo(r.x*s,yy);x.lineTo((r.x+r.w)*s,yy);x.stroke()}
+  x.setLineDash([]);
+  for(const[cx,cy]of corners(r)){x.fillStyle="#fff";x.beginPath();x.arc(cx*s,cy*s,9,0,Math.PI*2);x.fill();x.fillStyle=css("--accent");x.beginPath();x.arc(cx*s,cy*s,5,0,Math.PI*2);x.fill()}
+}
+const corners=r=>[[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]];
+function evPos(e){const b=$("cropCv").getBoundingClientRect();return[(e.clientX-b.left-CR.pad)/CR.scale,(e.clientY-b.top-CR.pad)/CR.scale]}
+function sizeFromAnchor(ax,ay,px,py,lock){
+  const[iw,ih]=imgDims(),a=plateAspect(),min=Math.max(iw,ih)*0.04;
+  const sx=px>=ax?1:-1,sy=py>=ay?1:-1,maxW=sx>0?iw-ax:ax,maxH=sy>0?ih-ay:ay;
+  let w=Math.max(min,Math.abs(px-ax)),h=Math.max(min,Math.abs(py-ay));
+  if(lock){if(w/h>a)h=w/a;else w=h*a;if(w>maxW){w=maxW;h=w/a}if(h>maxH){h=maxH;w=h*a}}
+  else{w=Math.min(w,maxW);h=Math.min(h,maxH)}
+  return{x:sx>0?ax:ax-w,y:sy>0?ay:ay-h,w,h};
+}
+$("cropCv").addEventListener("pointerdown",e=>{
+  const[px,py]=evPos(e),r=CR.r,hit=22/CR.scale;$("cropCv").setPointerCapture(e.pointerId);
+  const ci=corners(r).findIndex(([cx,cy])=>Math.hypot(cx-px,cy-py)<hit);
+  if(ci>=0){const[ax,ay]=corners(r)[3-ci];CR.drag={mode:"size",ax,ay}}
+  else if(px>r.x&&px<r.x+r.w&&py>r.y&&py<r.y+r.h)CR.drag={mode:"move",dx:px-r.x,dy:py-r.y};
+  else CR.drag={mode:"new",ax:px,ay:py};
+});
+$("cropCv").addEventListener("pointermove",e=>{
+  const[px,py]=evPos(e),[iw,ih]=imgDims(),d=CR.drag;
+  if(!d){const r=CR.r,hit=22/CR.scale;const onC=corners(r).some(([cx,cy])=>Math.hypot(cx-px,cy-py)<hit);
+    $("cropCv").style.cursor=onC?"nwse-resize":(px>r.x&&px<r.x+r.w&&py>r.y&&py<r.y+r.h)?"move":"crosshair";return}
+  if(d.mode==="move"){CR.r={...CR.r,x:clamp(px-d.dx,0,iw-CR.r.w),y:clamp(py-d.dy,0,ih-CR.r.h)}}
+  else{if(d.mode==="new"&&Math.hypot(px-d.ax,py-d.ay)<8/CR.scale)return;d.mode="size";
+    CR.r=sizeFromAnchor(d.ax,d.ay,clamp(px,0,iw),clamp(py,0,ih),$("cropLock").checked)}
+  drawCrop();
+});
+["pointerup","pointercancel"].forEach(t=>$("cropCv").addEventListener(t,()=>{CR.drag=null}));
+$("cropCv").addEventListener("keydown",e=>{
+  const k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!k)return;e.preventDefault();
+  const[iw,ih]=imgDims(),st=Math.max(iw,ih)*0.01,r=CR.r;
+  if(e.shiftKey)CR.r=sizeFromAnchor(r.x,r.y,r.x+r.w+k[0]*st,r.y+r.h+k[1]*st,$("cropLock").checked);
+  else CR.r={...r,x:clamp(r.x+k[0]*st,0,iw-r.w),y:clamp(r.y+k[1]*st,0,ih-r.h)};
+  drawCrop();
+});
+$("cropLock").addEventListener("change",e=>{S.cropLock=e.target.checked;if(S.cropLock)CR.r=lockRect(CR.r);drawCrop()});
+$("cropBtn").addEventListener("click",openCrop);$("cropTop").addEventListener("click",openCrop);
+$("thumb").addEventListener("dblclick",e=>{e.stopPropagation();openCrop()});
+$("cropApply").addEventListener("click",()=>{S.crop=normCrop(CR.r);$("cropDlg").close();drawThumb();syncCropUi();generate()});
+$("cropWhole").addEventListener("click",()=>{const[iw,ih]=imgDims();CR.r={x:0,y:0,w:iw,h:ih};if($("cropLock").checked)CR.r=lockRect(CR.r);drawCrop()});
+$("cropCancel").addEventListener("click",()=>$("cropDlg").close());
+$("cropReset").addEventListener("click",()=>{S.crop=null;drawThumb();syncCropUi();generate();toast("Using the whole picture again.")});
+window.addEventListener("resize",()=>{if($("cropDlg").open)sizeCrop()});
 
 // ---------- Saving ----------
 $("saveBtns").hidden=false;
@@ -496,40 +593,88 @@ function save(filename,data){
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Saved.");
 }
-$("savePng").addEventListener("click",()=>{
-  // Printable sheet: whole pattern + one page-section per plate with codes
-  const {pegW,pegH,px,py}=S;const cell=24,m=28,gap=40;
-  const plateW=m+pegW*cell, plateH=m+pegH*cell+30;
-  const cols=Math.min(px,2);const rows=Math.ceil(px*py/cols);
-  const ovCell=Math.max(4,Math.floor((cols*plateW+(cols-1)*gap)/S.W));
-  const sheetW=Math.max(cols*plateW+(cols-1)*gap,S.W*ovCell)+2*gap;
-  const sheetH=gap+40+S.H*ovCell+gap+rows*(plateH+gap)+gap;
-  const c=document.createElement("canvas");c.width=sheetW;c.height=sheetH;const x=c.getContext("2d");
-  const saveLook=S.look;if(S.look==="photo")S.look="bead";
-  const root=document.documentElement,prev=root.getAttribute("data-theme");root.setAttribute("data-theme","light");
-  x.fillStyle="#fff";x.fillRect(0,0,sheetW,sheetH);
-  x.fillStyle="#1A2130";x.font="700 26px Bricolage Grotesque, sans-serif";x.fillText(`${STANDARDS[S.std].label} — ${S.W} × ${S.H} beads, ${px} × ${py} plates`,gap,gap+20);
-  const sub=document.createElement("canvas");
-  const drawInto=(cw,ch,fn)=>{sub.width=cw;sub.height=ch;const sx=sub.getContext("2d");sx.setTransform(1,0,0,1,0,0);fn(sx);return sub};
-  x.drawImage(drawInto(S.W*ovCell,S.H*ovCell,sx=>{drawCells(sx,0,0,S.W,S.H,ovCell,{ox:0,oy:0,codes:false});sx.strokeStyle="#2445C8";sx.lineWidth=2;
-    for(let i=1;i<px;i++){sx.beginPath();sx.moveTo(i*pegW*ovCell,0);sx.lineTo(i*pegW*ovCell,S.H*ovCell);sx.stroke()}
-    for(let j=1;j<py;j++){sx.beginPath();sx.moveTo(0,j*pegH*ovCell);sx.lineTo(S.W*ovCell,j*pegH*ovCell);sx.stroke()}}),gap,gap+40);
-  for(let p=0;p<px*py;p++){
-    const col=p%cols,row=Math.floor(p/cols),ox=gap+col*(plateW+gap),oy=gap+40+S.H*ovCell+gap+row*(plateH+gap);
-    x.fillStyle="#1A2130";x.font="700 18px Bricolage Grotesque, sans-serif";x.fillText(`Plate ${p+1} (column ${p%px+1}, row ${Math.floor(p/px)+1})`,ox,oy+18);
-    x.drawImage(drawInto(plateW,plateW,sx=>{drawCells(sx,(p%px)*pegW,Math.floor(p/px)*pegH,pegW,pegH,cell,{ox:m,oy:m,codes:true});
-      sx.fillStyle="#fff";sx.fillRect(0,0,m,sub.height);sx.fillRect(0,0,sub.width,m);sx.fillStyle="#5A6474";sx.font="12px sans-serif";sx.textAlign="center";sx.textBaseline="middle";
-      for(let i=0;i<pegW;i++)if(i===0||(i+1)%5===0)sx.fillText(i+1,m+i*cell+cell/2,m/2);
-      for(let j=0;j<pegH;j++)if(j===0||(j+1)%5===0)sx.fillText(j+1,m/2,m+j*cell+cell/2);}),ox,oy+30);
+// Printable sheets. Split into several images when large, so phones (≈16 MP canvas limit) can save them.
+const SHEET_MAX_PX=14e6, SHEET_MAX_SIDE=16000;
+function withPrintLook(fn){
+  const root=document.documentElement,prev=root.getAttribute("data-theme"),look=S.look;
+  root.setAttribute("data-theme","light");if(S.look==="photo")S.look="bead";
+  try{return fn()}finally{prev?root.setAttribute("data-theme",prev):root.removeAttribute("data-theme");S.look=look}
+}
+function plateCanvas(p,cell){
+  const {pegW,pegH,px}=S,m=28,c=document.createElement("canvas");c.width=m+pegW*cell;c.height=m+pegH*cell;
+  const x=c.getContext("2d");
+  drawCells(x,(p%px)*pegW,Math.floor(p/px)*pegH,pegW,pegH,cell,{ox:m,oy:m,codes:true});
+  x.fillStyle="#fff";x.fillRect(0,0,m,c.height);x.fillRect(0,0,c.width,m);
+  x.fillStyle="#5A6474";x.font="12px Figtree, sans-serif";x.textAlign="center";x.textBaseline="middle";
+  for(let i=0;i<pegW;i++)if(i===0||(i+1)%5===0)x.fillText(i+1,m+i*cell+cell/2,m/2);
+  for(let j=0;j<pegH;j++)if(j===0||(j+1)%5===0)x.fillText(j+1,m/2,m+j*cell+cell/2);
+  x.strokeStyle="#CBD3DD";x.lineWidth=1;
+  for(let i=5;i<pegW;i+=5){x.beginPath();x.moveTo(m+i*cell,m);x.lineTo(m+i*cell,c.height);x.stroke()}
+  for(let j=5;j<pegH;j+=5){x.beginPath();x.moveTo(m,m+j*cell);x.lineTo(c.width,m+j*cell);x.stroke()}
+  return c;
+}
+function plateLabel(p){return `Plate ${p+1} (column ${p%S.px+1}, row ${Math.floor(p/S.px)+1})`}
+function buildSheets(){
+  return withPrintLook(()=>{
+    const {pegW,pegH,px,py,W,H}=S,cell=24,gap=40,titleH=44;
+    const pw=28+pegW*cell,ph=28+pegH*cell,n=px*py,cols=n===1?1:2;
+    const platesW=cols*pw+(cols-1)*gap;
+    const ovCell=Math.max(2,Math.min(14,Math.floor(Math.max(platesW,900)/W)));
+    const sheetW=Math.max(platesW,W*ovCell,900)+2*gap;
+    const maxH=Math.min(SHEET_MAX_SIDE,Math.floor(SHEET_MAX_PX/sheetW));
+    const legCols=Math.max(1,Math.floor((sheetW-2*gap)/260)),legH=Math.ceil(S.used.length/legCols)*28;
+    const blocks=[];
+    blocks.push({h:W*ovCell>0?H*ovCell:0,draw:(x,y)=>{
+      const o=document.createElement("canvas");o.width=W*ovCell;o.height=H*ovCell;const ox=o.getContext("2d");
+      drawCells(ox,0,0,W,H,ovCell,{ox:0,oy:0,codes:false});ox.strokeStyle="#2445C8";ox.lineWidth=2;
+      for(let i=1;i<px;i++){ox.beginPath();ox.moveTo(i*pegW*ovCell,0);ox.lineTo(i*pegW*ovCell,o.height);ox.stroke()}
+      for(let j=1;j<py;j++){ox.beginPath();ox.moveTo(0,j*pegH*ovCell);ox.lineTo(o.width,j*pegH*ovCell);ox.stroke()}
+      x.drawImage(o,gap,y);}});
+    blocks.push({h:legH,draw:(x,y)=>{
+      x.font="15px Figtree, sans-serif";x.textBaseline="middle";x.textAlign="left";
+      S.used.forEach((c,i)=>{const cx=gap+(i%legCols)*260,cy=y+Math.floor(i/legCols)*28+12;
+        x.fillStyle=c.hex;x.beginPath();x.arc(cx+9,cy,9,0,Math.PI*2);x.fill();x.strokeStyle="rgba(0,0,0,.25)";x.stroke();
+        x.fillStyle="#1A2130";x.fillText(`${c.code} ${c.name} — ${c.count}`,cx+26,cy);});}});
+    for(let r=0;r<Math.ceil(n/cols);r++){
+      blocks.push({h:30+ph,draw:(x,y)=>{for(let k=0;k<cols;k++){const p=r*cols+k;if(p>=n)break;const ox=gap+k*(pw+gap);
+        x.fillStyle="#1A2130";x.font="700 18px Bricolage Grotesque, Figtree, sans-serif";x.textAlign="left";x.textBaseline="alphabetic";
+        x.fillText(plateLabel(p),ox,y+18);x.drawImage(plateCanvas(p,cell),ox,y+30);}}});
+    }
+    const pages=[];let cur=[],used=gap+titleH;
+    for(const b of blocks){if(cur.length&&used+b.h+gap>maxH){pages.push({blocks:cur,h:used});cur=[];used=gap+titleH}cur.push(b);used+=b.h+gap}
+    pages.push({blocks:cur,h:used});
+    return pages.map((pg,i)=>{
+      const c=document.createElement("canvas");c.width=sheetW;c.height=pg.h;const x=c.getContext("2d");
+      x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+      x.fillStyle="#1A2130";x.font="700 24px Bricolage Grotesque, Figtree, sans-serif";x.textAlign="left";x.textBaseline="alphabetic";
+      x.fillText(`${STANDARDS[S.std].label} — ${W} × ${H} beads, ${px} × ${py} plates`+(pages.length>1?` (sheet ${i+1} of ${pages.length})`:""),gap,gap+22);
+      let y=gap+titleH;for(const b of pg.blocks){b.draw(x,y);y+=b.h+gap}
+      return c;
+    });
+  });
+}
+const toBlob=c=>new Promise(r=>c.toBlob(r,"image/png"));
+$("savePng").addEventListener("click",async()=>{
+  const sheets=buildSheets();
+  if(sheets.length>1)toast(`Saving ${sheets.length} sheets — the pattern is too big for one image.`);
+  for(let i=0;i<sheets.length;i++){
+    const blob=await toBlob(sheets[i]);
+    if(!blob){toast("This pattern is too big to save on this device. Save one plate at a time instead.");return}
+    await save(sheets.length>1?`parlplatta-pattern-${i+1}-of-${sheets.length}.png`:"parlplatta-pattern.png",blob);
+    if(i<sheets.length-1)await new Promise(r=>setTimeout(r,400));
   }
-  prev?root.setAttribute("data-theme",prev):root.removeAttribute("data-theme");S.look=saveLook;
-  c.toBlob(b=>save("parlplatta-pattern.png",b),"image/png");
+});
+$("savePlate").addEventListener("click",async()=>{
+  const c=withPrintLook(()=>{const pc=plateCanvas(S.plate,32),gap=30,o=document.createElement("canvas");o.width=pc.width+2*gap;o.height=pc.height+2*gap+34;
+    const x=o.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,o.width,o.height);x.fillStyle="#1A2130";x.font="700 20px Bricolage Grotesque, Figtree, sans-serif";
+    x.fillText(plateLabel(S.plate),gap,gap+18);x.drawImage(pc,gap,gap+34);return o});
+  const blob=await toBlob(c);if(blob)save(`parlplatta-plate-${S.plate+1}.png`,blob);
 });
 $("saveCsv").addEventListener("click",()=>{
   const head=["Code","Colour","Total",...Array.from({length:S.px*S.py},(_,i)=>`Plate ${i+1}`)];
   const per=Array.from({length:S.px*S.py},(_,i)=>plateCounts(i));
   const rows=S.used.map((c,k)=>[c.code,c.name,c.count,...per.map(p=>p[k])]);
-  save("parlplatta-beads.csv",[head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"));
+  save("parlplatta-beads.csv","\uFEFF"+[head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n"));
 });
 
 // ---------- Start ----------
