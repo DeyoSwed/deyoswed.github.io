@@ -203,10 +203,10 @@ dialog#cropDlg::backdrop{background:rgba(10,14,22,.55)}
 </div>
 <dialog id="cropDlg" aria-labelledby="cropTitle">
   <h2 id="cropTitle">Crop picture</h2>
-  <p class="hint">Drag the frame to move it, drag a corner to resize, or drag outside the frame to draw a new one. Dashed lines show where plates meet.</p>
+  <p class="hint">Drag the frame to move it, drag a corner to resize, or drag outside the frame to draw a new one. The frame can go past the picture’s edges — that space becomes empty pegs. Dashed lines show where plates meet.</p>
   <div id="cropStage" class="cropstage"><canvas id="cropCv" tabindex="0" aria-label="Crop frame. Arrow keys move it; Shift and arrow keys resize it."></canvas></div>
   <label class="row"><span>Keep the shape of your plates</span><input type="checkbox" id="cropLock" checked></label>
-  <div class="btns"><button class="primary" id="cropApply">Use this crop</button><button id="cropWhole">Select whole picture</button><button id="cropCancel">Cancel</button></div>
+  <div class="btns"><button class="primary" id="cropApply">Use this crop</button><button id="cropWhole">Frame the whole picture</button><button id="cropCancel">Cancel</button></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 
@@ -293,10 +293,12 @@ function loadFile(file){
   img.src=url;
 }
 function drawThumb(){
-  const t=$("thumb"),x=t.getContext("2d"),r=cropPx();
-  const s=Math.max(128/r.w,128/r.h);x.clearRect(0,0,128,128);x.drawImage(S.src,r.x,r.y,r.w,r.h,(128-r.w*s)/2,(128-r.h*s)/2,r.w*s,r.h*s);
+  const t=$("thumb"),x=t.getContext("2d"),r=cropPx(),[iw,ih]=imgDims();
+  const s=S.crop?Math.min(128/r.w,128/r.h):Math.max(128/r.w,128/r.h),fx=(128-r.w*s)/2,fy=(128-r.h*s)/2;
+  x.clearRect(0,0,128,128);x.save();x.beginPath();x.rect(fx,fy,r.w*s,r.h*s);x.clip();
+  if(S.crop){x.fillStyle=css("--peg");x.fillRect(fx,fy,r.w*s,r.h*s)}
+  x.drawImage(S.src,fx-r.x*s,fy-r.y*s,iw*s,ih*s);x.restore();
 }
-
 // ---------- Pattern generation ----------
 function activePalette(){
   const key=STANDARDS[S.std].pal;
@@ -306,15 +308,13 @@ function sampleSource(W,H){
   const K=Math.max(1,Math.min(6,Math.floor(1600/Math.max(W,H))));
   const c=document.createElement("canvas");c.width=W*K;c.height=H*K;const x=c.getContext("2d",{willReadFrequently:true});
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";
-  const cr=cropPx(),sx0=cr.x,sy0=cr.y,sw=cr.w,sh=cr.h;
-  const tr=W/H, ir=sw/sh;
-  if(S.fit==="cover"){
-    let cw=sw,ch=sh; if(ir>tr){cw=sh*tr}else{ch=sw/tr}
-    x.drawImage(S.src,sx0+(sw-cw)/2,sy0+(sh-ch)/2,cw,ch,0,0,c.width,c.height);
-  }else{
-    let dw=c.width,dh=c.height; if(ir>tr){dh=c.width/ir}else{dw=c.height*ir}
-    x.drawImage(S.src,sx0,sy0,sw,sh,(c.width-dw)/2,(c.height-dh)/2,dw,dh);
-  }
+  // Map the frame (which may extend past the picture) onto the bead grid; outside the picture stays transparent = empty pegs
+  const cr=cropPx(),[iw,ih]=imgDims(),tr=W/H,ir=cr.w/cr.h;
+  let rx=cr.x,ry=cr.y,rw=cr.w,rh=cr.h,dx=0,dy=0,dw=c.width,dh=c.height;
+  if(S.fit==="cover"){if(ir>tr){rw=cr.h*tr;rx=cr.x+(cr.w-rw)/2}else{rh=cr.w/tr;ry=cr.y+(cr.h-rh)/2}}
+  else{if(ir>tr){dh=c.width/ir;dy=(c.height-dh)/2}else{dw=c.height*ir;dx=(c.width-dw)/2}}
+  const kx=dw/rw,ky=dh/rh;
+  x.save();x.beginPath();x.rect(dx,dy,dw,dh);x.clip();x.drawImage(S.src,dx-rx*kx,dy-ry*ky,iw*kx,ih*ky);x.restore();
   const d=x.getImageData(0,0,c.width,c.height).data;
   const out=new Float32Array(W*H*4);
   for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){
@@ -508,35 +508,54 @@ let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(rend
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
 
 // ---------- Crop ----------
+// The frame may reach past the picture's edges; anything outside the picture becomes empty pegs.
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const imgDims=()=>[S.src.naturalWidth||S.src.width,S.src.naturalHeight||S.src.height];
 const plateAspect=()=>(S.px*S.pegW)/(S.py*S.pegH);
 function cropPx(){const[iw,ih]=imgDims();const c=S.crop||{x:0,y:0,w:1,h:1};return{x:c.x*iw,y:c.y*ih,w:c.w*iw,h:c.h*ih}}
-function lockRect(r){ // keep centre, match plate shape, stay inside picture
-  const[iw,ih]=imgDims(),a=plateAspect();let w=r.w,h=r.h;const cx=r.x+w/2,cy=r.y+h/2;
-  if(w/h>a)w=h*a;else h=w/a; if(w>iw){w=iw;h=w/a} if(h>ih){h=ih;w=h*a}
-  return{x:clamp(cx-w/2,0,iw-w),y:clamp(cy-h/2,0,ih-h),w,h};
+function workArea(){ // room around the picture: enough to fit the whole picture in a plate-shaped frame, plus a margin
+  const[iw,ih]=imgDims(),a=plateAspect(),m=0.1*Math.max(iw,ih);
+  const mx=Math.max(0,(ih*a-iw)/2)+m,my=Math.max(0,(iw/a-ih)/2)+m;
+  return{x:-mx,y:-my,w:iw+2*mx,h:ih+2*my};
 }
-function normCrop(r){const[iw,ih]=imgDims();if(r.w>=iw*0.995&&r.h>=ih*0.995)return null;return{x:r.x/iw,y:r.y/ih,w:r.w/iw,h:r.h/ih}}
-function syncCropUi(){$("cropReset").hidden=!S.crop;$("cropState").textContent=S.crop?"Using a cropped part of the picture.":""}
+function fitIn(r){const E=workArea();const w=Math.min(r.w,E.w),h=Math.min(r.h,E.h);return{x:clamp(r.x,E.x,E.x+E.w-w),y:clamp(r.y,E.y,E.y+E.h-h),w,h}}
+function lockRect(r){ // keep centre, match plate shape
+  const E=workArea(),a=plateAspect();let w=r.w,h=r.h;const cx=r.x+w/2,cy=r.y+h/2;
+  if(w/h>a)w=h*a;else h=w/a; if(w>E.w){w=E.w;h=w/a} if(h>E.h){h=E.h;w=h*a}
+  return fitIn({x:cx-w/2,y:cy-h/2,w,h});
+}
+function wholeRect(lock){const[iw,ih]=imgDims();if(!lock)return{x:0,y:0,w:iw,h:ih};
+  const a=plateAspect(),w=Math.max(iw,ih*a),h=w/a;return{x:(iw-w)/2,y:(ih-h)/2,w,h}}
+function normCrop(r){const[iw,ih]=imgDims(),t=Math.max(iw,ih)*0.002;
+  if(Math.abs(r.x)<t&&Math.abs(r.y)<t&&Math.abs(r.w-iw)<t&&Math.abs(r.h-ih)<t)return null;
+  return{x:r.x/iw,y:r.y/ih,w:r.w/iw,h:r.h/ih}}
+function syncCropUi(){$("cropReset").hidden=!S.crop;
+  let note="";if(S.crop){const[iw,ih]=imgDims(),r=cropPx();const out=r.x<-1||r.y<-1||r.x+r.w>iw+1||r.y+r.h>ih+1;
+    note=out?"Using a custom frame with empty space around the picture.":"Using a cropped part of the picture."}
+  $("cropState").textContent=note}
 const CR={r:null,scale:1,pad:14,drag:null};
 function openCrop(){
   if(!S.src)return;
-  CR.r=S.crop?cropPx():(S.cropLock?lockRect(cropPx()):cropPx());
+  CR.r=S.crop?fitIn(cropPx()):(S.cropLock?lockRect(cropPx()):cropPx());
   $("cropLock").checked=S.cropLock;$("cropDlg").showModal();sizeCrop();$("cropCv").focus();
 }
 function sizeCrop(){
-  const[iw,ih]=imgDims(),stage=$("cropStage"),aw=stage.clientWidth,ah=Math.min(innerHeight*0.62,620);
-  const P=CR.pad,s=Math.min((aw-2*P)/iw,(ah-2*P)/ih);CR.scale=s;const cv=$("cropCv");const x=setupCanvas(cv,Math.round(iw*s)+2*P,Math.round(ih*s)+2*P);drawCrop();
+  const E=workArea(),stage=$("cropStage"),aw=stage.clientWidth,ah=Math.min(innerHeight*0.62,620);
+  const P=CR.pad,s=Math.min((aw-2*P)/E.w,(ah-2*P)/E.h);CR.scale=s;
+  setupCanvas($("cropCv"),Math.round(E.w*s)+2*P,Math.round(E.h*s)+2*P);drawCrop();
 }
 function drawCrop(){
-  const cv=$("cropCv"),x=cv.getContext("2d"),s=CR.scale,[iw,ih]=imgDims(),r=CR.r,W=iw*s,H=ih*s;
-  x.setTransform(1,0,0,1,0,0);const dpr=cv.width/(W+2*CR.pad);x.setTransform(dpr,0,0,dpr,CR.pad*dpr,CR.pad*dpr);
-  x.clearRect(-CR.pad,-CR.pad,W+2*CR.pad,H+2*CR.pad);x.drawImage(S.src,0,0,W,H);
-  x.fillStyle="rgba(10,14,22,.6)";
-  x.fillRect(0,0,W,r.y*s);x.fillRect(0,(r.y+r.h)*s,W,H-(r.y+r.h)*s);x.fillRect(0,r.y*s,r.x*s,r.h*s);x.fillRect((r.x+r.w)*s,r.y*s,W-(r.x+r.w)*s,r.h*s);
+  const cv=$("cropCv"),x=cv.getContext("2d"),s=CR.scale,E=workArea(),[iw,ih]=imgDims(),r=CR.r,P=CR.pad;
+  const dpr=cv.width/(E.w*s+2*P);
+  x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,cv.width,cv.height);
+  x.setTransform(dpr,0,0,dpr,(P-E.x*s)*dpr,(P-E.y*s)*dpr); // origin = picture's top-left corner
+  // empty-peg area outside the picture
+  x.fillStyle=css("--board");x.fillRect(E.x*s,E.y*s,E.w*s,E.h*s);
+  x.fillStyle=css("--peg");const g=Math.max(8,12);
+  for(let yy=E.y*s+g/2;yy<(E.y+E.h)*s;yy+=g)for(let xx=E.x*s+g/2;xx<(E.x+E.w)*s;xx+=g){x.beginPath();x.arc(xx,yy,1.6,0,Math.PI*2);x.fill()}
+  x.drawImage(S.src,0,0,iw*s,ih*s);
+  x.fillStyle="rgba(10,14,22,.6)";x.beginPath();x.rect(E.x*s,E.y*s,E.w*s,E.h*s);x.rect(r.x*s,r.y*s,r.w*s,r.h*s);x.fill("evenodd");
   x.strokeStyle="#fff";x.lineWidth=2;x.strokeRect(r.x*s+1,r.y*s+1,r.w*s-2,r.h*s-2);
-  // plate lines inside the frame, so you see where plates will join
   x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=1;x.setLineDash([4,4]);
   for(let i=1;i<S.px;i++){const xx=(r.x+r.w*i/S.px)*s;x.beginPath();x.moveTo(xx,r.y*s);x.lineTo(xx,(r.y+r.h)*s);x.stroke()}
   for(let j=1;j<S.py;j++){const yy=(r.y+r.h*j/S.py)*s;x.beginPath();x.moveTo(r.x*s,yy);x.lineTo((r.x+r.w)*s,yy);x.stroke()}
@@ -544,10 +563,10 @@ function drawCrop(){
   for(const[cx,cy]of corners(r)){x.fillStyle="#fff";x.beginPath();x.arc(cx*s,cy*s,9,0,Math.PI*2);x.fill();x.fillStyle=css("--accent");x.beginPath();x.arc(cx*s,cy*s,5,0,Math.PI*2);x.fill()}
 }
 const corners=r=>[[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]];
-function evPos(e){const b=$("cropCv").getBoundingClientRect();return[(e.clientX-b.left-CR.pad)/CR.scale,(e.clientY-b.top-CR.pad)/CR.scale]}
+function evPos(e){const b=$("cropCv").getBoundingClientRect(),E=workArea();return[(e.clientX-b.left-CR.pad)/CR.scale+E.x,(e.clientY-b.top-CR.pad)/CR.scale+E.y]}
 function sizeFromAnchor(ax,ay,px,py,lock){
-  const[iw,ih]=imgDims(),a=plateAspect(),min=Math.max(iw,ih)*0.04;
-  const sx=px>=ax?1:-1,sy=py>=ay?1:-1,maxW=sx>0?iw-ax:ax,maxH=sy>0?ih-ay:ay;
+  const E=workArea(),[iw,ih]=imgDims(),a=plateAspect(),min=Math.max(iw,ih)*0.04;
+  const sx=px>=ax?1:-1,sy=py>=ay?1:-1,maxW=sx>0?E.x+E.w-ax:ax-E.x,maxH=sy>0?E.y+E.h-ay:ay-E.y;
   let w=Math.max(min,Math.abs(px-ax)),h=Math.max(min,Math.abs(py-ay));
   if(lock){if(w/h>a)h=w/a;else w=h*a;if(w>maxW){w=maxW;h=w/a}if(h>maxH){h=maxH;w=h*a}}
   else{w=Math.min(w,maxW);h=Math.min(h,maxH)}
@@ -561,12 +580,12 @@ $("cropCv").addEventListener("pointerdown",e=>{
   else CR.drag={mode:"new",ax:px,ay:py};
 });
 $("cropCv").addEventListener("pointermove",e=>{
-  const[px,py]=evPos(e),[iw,ih]=imgDims(),d=CR.drag;
+  const[px,py]=evPos(e),E=workArea(),d=CR.drag;
   if(!d){const r=CR.r,hit=22/CR.scale;const onC=corners(r).some(([cx,cy])=>Math.hypot(cx-px,cy-py)<hit);
     $("cropCv").style.cursor=onC?"nwse-resize":(px>r.x&&px<r.x+r.w&&py>r.y&&py<r.y+r.h)?"move":"crosshair";return}
-  if(d.mode==="move"){CR.r={...CR.r,x:clamp(px-d.dx,0,iw-CR.r.w),y:clamp(py-d.dy,0,ih-CR.r.h)}}
+  if(d.mode==="move"){CR.r=fitIn({...CR.r,x:px-d.dx,y:py-d.dy})}
   else{if(d.mode==="new"&&Math.hypot(px-d.ax,py-d.ay)<8/CR.scale)return;d.mode="size";
-    CR.r=sizeFromAnchor(d.ax,d.ay,clamp(px,0,iw),clamp(py,0,ih),$("cropLock").checked)}
+    CR.r=sizeFromAnchor(d.ax,d.ay,clamp(px,E.x,E.x+E.w),clamp(py,E.y,E.y+E.h),$("cropLock").checked)}
   drawCrop();
 });
 ["pointerup","pointercancel"].forEach(t=>$("cropCv").addEventListener(t,()=>{CR.drag=null}));
@@ -574,14 +593,14 @@ $("cropCv").addEventListener("keydown",e=>{
   const k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!k)return;e.preventDefault();
   const[iw,ih]=imgDims(),st=Math.max(iw,ih)*0.01,r=CR.r;
   if(e.shiftKey)CR.r=sizeFromAnchor(r.x,r.y,r.x+r.w+k[0]*st,r.y+r.h+k[1]*st,$("cropLock").checked);
-  else CR.r={...r,x:clamp(r.x+k[0]*st,0,iw-r.w),y:clamp(r.y+k[1]*st,0,ih-r.h)};
+  else CR.r=fitIn({...r,x:r.x+k[0]*st,y:r.y+k[1]*st});
   drawCrop();
 });
 $("cropLock").addEventListener("change",e=>{S.cropLock=e.target.checked;if(S.cropLock)CR.r=lockRect(CR.r);drawCrop()});
 $("cropBtn").addEventListener("click",openCrop);$("cropTop").addEventListener("click",openCrop);
 $("thumb").addEventListener("dblclick",e=>{e.stopPropagation();openCrop()});
 $("cropApply").addEventListener("click",()=>{S.crop=normCrop(CR.r);$("cropDlg").close();drawThumb();syncCropUi();generate()});
-$("cropWhole").addEventListener("click",()=>{const[iw,ih]=imgDims();CR.r={x:0,y:0,w:iw,h:ih};if($("cropLock").checked)CR.r=lockRect(CR.r);drawCrop()});
+$("cropWhole").addEventListener("click",()=>{CR.r=wholeRect($("cropLock").checked);drawCrop()});
 $("cropCancel").addEventListener("click",()=>$("cropDlg").close());
 $("cropReset").addEventListener("click",()=>{S.crop=null;drawThumb();syncCropUi();generate();toast("Using the whole picture again.")});
 window.addEventListener("resize",()=>{if($("cropDlg").open)sizeCrop()});
